@@ -7,7 +7,7 @@ import 'primeicons/primeicons.css';
 import '../styles/layout/layout.scss';
 import dynamic from 'next/dynamic';
 import '../pages/'
-import bot from './chatbot';
+
 
 // export default function App({ Component, pageProps }) {
 //   // return <Component {...pageProps} />
@@ -33,7 +33,7 @@ const App = ({ Component, pageProps }) => {
     return (
       <LayoutProvider>
 
-        {bot()}  {/* Esperar confirmación de Uriel */}
+      
         <Component {...pageProps} />
         {/* </Layout> */}
 
