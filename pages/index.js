@@ -130,9 +130,9 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>Jardin del Eden</title>
+        <title>Administrador</title>
         <meta charSet="UTF-8" />
-        <meta name="description" content="Jardin del eden, una pagina para comprar flores" />
+        <meta name="description" content="Interfaz para administrar la pagina jardin del eden" />
         <meta name="robots" content="index, follow" />
         <meta name="viewport" content="initial-scale=1, width=device-width" />
         <meta property="og:type" content="website"></meta>

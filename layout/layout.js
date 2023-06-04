@@ -103,7 +103,7 @@ const Layout = (props) => {
   return (
     <React.Fragment>
       <Head>
-        <title>{`Jardin del Eden - ${props.title}`}</title>
+        <title>{`Administrador - ${props.title}`}</title>
         <meta charSet="UTF-8" />
         <meta name="description" content={`${props.description}`} />
         <meta name="robots" content="index, follow" />

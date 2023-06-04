@@ -43,7 +43,7 @@ const Dashboard = () => {
   return (
     <Layout
       title="Inicio"
-      description="Pagina principal de jardin del eden"
+      description="Pagina principal del administrador"
     >
       <div className="grid">
         <div className="col-12">

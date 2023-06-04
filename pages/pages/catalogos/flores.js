@@ -1,189 +1,241 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import Layout from "@/layout/layout"
+//--> Componentes primeReact
 import { Tag } from 'primereact/tag';
+import { classNames } from 'primereact/utils';
 import { Button } from 'primereact/button';
+import { FileUpload } from 'primereact/fileupload';
 import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
-import { DataView, DataViewLayoutOptions } from 'primereact/dataview';
-// import { Rating } from 'primereact/rating';
+import { InputNumber } from 'primereact/inputnumber';
+import { DataTable } from 'primereact/datatable';
+import { Column } from 'primereact/column';
+import { Toast } from 'primereact/toast';
+import { Toolbar } from 'primereact/toolbar';
+import { Dropdown } from 'primereact/dropdown';
+import { RadioButton } from 'primereact/radiobutton';
+import { Message } from 'primereact/message';
+//--> Funciones propias
+import { objetoVacio } from "@/components/catalogos/objetovacio";
+import { formatoPrecio } from "@/helpers/funciones";
+import { camposVacios } from "@/components/mensajesNotificaciones/mensajes";
+import { listaCategorias } from "@/components/catalogos/listacategorias";
 
 const CatalogoFlores = () => {
+  //--> Estructura de objeto vacio
+  let florVacia = objetoVacio
+
   //----------------| Lista de variables |----------------
-  const [flores, setFlores] = useState([])
-  const [layout, setLayout] = useState('grid');
-  //-->Detalles de flor
-  const [detallesFlor, setDetallesFlor] = useState({})
-  const [mostrarDialog, setMostrarDialog] = useState(false)
-  //--> Buscador
-  const [buscador, setBuscador] = useState('')
+  //--> Registros
+  const [product, setProduct] = useState(florVacia);
+  const [products, setProducts] = useState(null);
+  //--> Dialogos
+  const [productDialog, setProductDialog] = useState(false);
+  const [deleteProductDialog, setDeleteProductDialog] = useState(false);
+  const [deleteProductsDialog, setDeleteProductsDialog] = useState(false);
+  //--> Otros
+  const [selectedProducts, setSelectedProducts] = useState(null);
+  const [submitted, setSubmitted] = useState(false);
+  const [globalFilter, setGlobalFilter] = useState(null);
+  //--> Mensajes
+  const [mensajeRespuesta, setMensajeRespuesta] = useState('')
+  //--> Especiales
+  const toast = useRef(null);
+  const dt = useRef(null);
 
-  //--> Ejecucion en segundo plano
-  const datosFlores = [
-    {
-      nombre: "Rosa", precio: 5.90, categoria: "primavera", estatus: "disponible",
-      imagen: "https://png.pngtree.com/png-vector/20210710/ourmid/pngtree-close-up-of-rose-simulation-growth-png-image_3580749.jpg", descripcion: "Descripcion de rosa"
-    },
-    {
-      nombre: "Tulipan", precio: 6.20, categoria: "otoño", estatus: "agotado",
-      imagen: "https://w7.pngwing.com/pngs/666/928/png-transparent-tulip-free-content-flower-georgia-bulldogs-leaf-heart-computer-wallpaper.png",
-      descripcion: "Descripcion de tulipan"
-    },
-    {
-      nombre: "Girasol", precio: 3.50, categoria: "invierno", estatus: "pocos",
-      imagen: "https://media.admagazine.com/photos/61eb22cb9b19d943aa117b30/master/w_1600%2Cc_limit/Girasol.jpg",
-      descripcion: "Descripcion de girasol"
-    },
-    {
-      nombre: "Setosa", precio: 25.23, categoria: "primavera", estatus: "pocos",
-      imagen: "https://img1.freepng.es/20180314/vbq/kisspng-bird-echeveria-agavoides-echeveria-setosa-graptope-lotus-design-material-5aa973bd8fb253.3676960215210546535886.jpg", descripcion: "Descripcion de setosa"
-    },
-    {
-      nombre: "Gardenia", precio: 78.60, categoria: "verano", estatus: "disponible",
-      imagen: "https://us.123rf.com/450wm/rprongjai/rprongjai1910/rprongjai191000001/131915934-flores-de-gardenia-sobre-fondo-blanco.jpg?ver=6", descripcion: "Descripcion de gardenia"
-    },
-    {
-      nombre: "Versicolor", precio: 84.69, categoria: "verano", estatus: "agotado",
-      imagen: "https://img2.freepng.es/20180409/wce/kisspng-cut-flowers-iris-versicolor-iris-5acb7fdb4bc3d7.6318569115232859793103.jpg", descripcion: "Descripcion de versicolor"
-    },
-  ]
-  useEffect(() => { setFlores(datosFlores) }, [])
+  //--> Cargar cuando se renderiza
+  useEffect(() => {
+    const datos = [
+      { id: 1, nombre: 'Rosa', precio: 60, categoria: 'Fiestas', imagenes: null, estatus: 'DISPONIBLE' },
+      { id: 2, nombre: 'Girasol', precio: 15, categoria: 'San valentin', imagenes: null, estatus: 'POCOS' },
+      { id: 3, nombre: 'Setosa', precio: 189, categoria: 'Año nuevo', imagenes: null, estatus: 'AGOTADO' },
+      { id: 4, nombre: 'Tulipan', precio: 87, categoria: 'Cumpleaños', imagenes: null, estatus: 'DISPONIBLE' },
+    ]
+    setProducts(datos)
+  }, []);
 
-  //--> Indicar estado de la flor
-  const getSeverity = (flor) => {
-    switch (flor.estatus) {
-      case 'disponible':
-        return 'success';
 
-      case 'pocos':
-        return 'warning';
+  //----------------| Interaccion con dialogos |----------------
+  const abrirDialogoCM = () => {
+    setProduct(florVacia);
+    setSubmitted(false);
+    setProductDialog(true);
+  };
 
-      case 'agotado':
-        return 'danger';
+  const cerrarDialogoCM = () => {
+    setSubmitted(false);
+    setProductDialog(false);
+  };
 
-      default:
-        return null;
+  const cerrarDialogoEliminarRegistro = () => { setDeleteProductDialog(false) };
+
+  const cerrarDialogoEliminarRegistros = () => { setDeleteProductsDialog(false) }
+
+  //----------------| Funciones Back-end |----------------
+  const guardarRegistro = () => {
+    //--> Validacion antes de envio
+    if (Object.values(product).includes('')) {
+      setMensajeRespuesta(camposVacios)
+      setTimeout(() => { setMensajeRespuesta('') }, 3000)
+      return
+    }
+
+    setSubmitted(true);
+    //--> Editar registro
+    if (product.id) {
+      const arregloModificado = products.map((regis) => regis.id === product.id ? product : regis)
+      setProducts(arregloModificado)
+      toast.current.show({ severity: 'success', summary: 'Flor actualizada', detail: 'Se ha actualizado la flor', life: 3000 });
+    }
+    //--> Crear registro
+    else {
+      const arregloNuevo = [...products, product]
+      setProducts(arregloNuevo)
+      toast.current.show({ severity: 'success', summary: 'Flor creada', detail: 'La flor ha sido creada', life: 3000 });
+    }
+    setProduct(florVacia);
+    setProductDialog(false);
+  };
+
+  const editarRegistro = (product) => {
+    setProduct({ ...product });
+    setProductDialog(true);
+  };
+
+  const confirmarEliminarRegistro = (product) => {
+    setProduct(product);
+    setDeleteProductDialog(true);
+  };
+
+  const eliminarRegistro = () => {
+    //--> Registros que no sean los seleccionados
+    let _products = products.filter((val) => val.id !== product.id);
+
+    setProducts(_products);
+    setDeleteProductDialog(false);
+    setProduct(florVacia);
+    toast.current.show({
+      severity: 'success', summary: 'Flor eliminada', detail: 'Se ha eliminado correctamente la flor', life: 3000
+    });
+  };
+
+  const exportCSV = () => { dt.current.exportCSV() }
+
+  const confirmDeleteSelected = () => { setDeleteProductsDialog(true) }
+
+  const deleteSelectedProducts = () => {
+    //--> Registros que no son seleccionados
+    let _products = products.filter((val) => !selectedProducts.includes(val));
+
+    setProducts(_products);
+    setDeleteProductsDialog(false);
+    setSelectedProducts(null);
+    toast.current.show({
+      severity: 'success', summary: 'Flores eliminadas', detail: 'Las flores fueron eliminadas', life: 3000
+    });
+  };
+
+  //----------------| Funciones para editar |----------------
+  const cambiarEstatus = (e) => {
+    let _product = { ...product };
+
+    _product['estatus'] = e.value;
+    setProduct(_product);
+  };
+
+  const cambiarString = (e, name) => {
+    const val = (e.target && e.target.value) || '';
+    let _product = { ...product };
+    _product[`${name}`] = val;
+    setProduct(_product);
+  };
+
+  const cambiarNumero = (e, name) => {
+    const val = e.value || 0;
+    let _product = { ...product };
+    _product[`${name}`] = val;
+    setProduct(_product);
+  };
+
+  //----------------| Plantillas |----------------
+  const plantillaImagen = (rowData) => {
+    return <img
+      // src={`https://primefaces.org/cdn/primereact/images/product/${rowData.image}`}
+      alt={rowData.image} className="shadow-2 border-round" style={{ width: '64px' }} />;
+  };
+
+  const plantillaPrecio = (rowData) => { return formatoPrecio(rowData.precio) }
+
+  const ratingBodyTemplate = (rowData) => {
+    return <Rating value={rowData.rating} readOnly cancel={false} />;
+  };
+
+  const plantillaEstatus = (rowData) => {
+    return <Tag value={rowData.estatus} severity={getSeverity(rowData)}></Tag>;
+  };
+
+  const getSeverity = (product) => {
+    switch (product.estatus) {
+      case 'DISPONIBLE': return 'success';
+      case 'POCOS': return 'warning';
+      case 'AGOTADO': return 'danger';
+      default: return null;
     }
   };
 
-  //--> Modo de vista: lista
-  const listItem = (flor) => {
+  //----------------| Botones de dialogos |----------------
+  const cabezal = (
+    <div className="flex flex-wrap gap-2 align-items-center justify-content-between">
+      <h4 className="m-0">Control de flores</h4>
+      <span className="p-input-icon-left">
+        <i className="pi pi-search" />
+        <InputText type="search" onInput={(e) => setGlobalFilter(e.target.value)} placeholder="Buscar..." />
+      </span>
+    </div>
+  );
+
+  const botonIzquierda = () => {
     return (
-      <div className="col-12">
-        <div className="flex flex-column xl:flex-row xl:align-items-start p-4 gap-4">
-
-          <img className="w-9 sm:w-16rem xl:w-10rem shadow-2 block xl:block mx-auto border-round" src={`${flor.imagen}`} alt={`${flor.nombre}`} style={{ width: '200px', height: '200px' }} />
-          <div className="flex flex-column sm:flex-row justify-content-between align-items-center xl:align-items-start flex-1 gap-4">
-            <div className="flex flex-column align-items-center sm:align-items-start gap-3">
-              <div className="text-2xl font-bold text-900">{flor.nombre}</div>
-              {/* <Rating value={flor.rating} readOnly cancel={false}></Rating> */}
-              <div className="flex align-items-center gap-3">
-                <Tag value={flor.estatus} severity={getSeverity(flor)}></Tag>
-                <span className="flex align-items-center gap-2">
-                  <i className="pi pi-tag"></i>
-                  <span className="font-semibold">{flor.categoria}</span>
-                </span>
-              </div>
-              <span className="text-2xl font-semibold mt-8">${flor.precio}</span>
-            </div>
-
-            <div className="flex sm:flex-column align-items-center sm:align-items-end gap-3 sm:gap-2 mt-6">
-              <Button label="Favoritos" icon="pi pi-heart" rounded severity="help"
-                aria-label="Favorite" className="p-button-rounded" />
-              <Button label="Agregar" icon="pi pi-shopping-cart" className="p-button-rounded"
-                disabled={flor.estatus === 'agotado'} />
-              <Button label="Detalles" icon="pi pi-external-link" className="p-button-rounded"
-                onClick={() => dialogoFlor(flor)} />
-            </div>
-
-          </div>
-        </div>
+      <div className="flex flex-wrap gap-2">
+        <Button label="New" icon="pi pi-plus" severity="success" onClick={abrirDialogoCM} />
+        <Button label="Delete" icon="pi pi-trash" severity="danger" onClick={confirmDeleteSelected} disabled={!selectedProducts || !selectedProducts.length} />
       </div>
     );
   };
 
-  //--> Modo de vista: grid
-  const gridItem = (flor) => {
+  const botonDerecha = () => {
+    return <Button label="Export" icon="pi pi-upload" className="p-button-help" onClick={exportCSV} />;
+  };
+
+  const botonesAccion = (rowData) => {
     return (
-      <div className="col-12 sm:col-6 lg:col-12 xl:col-4 p-2">
-        <div className="p-4 border-1 surface-border surface-card border-round">
-
-          <div className="flex flex-wrap align-items-center justify-content-between gap-2">
-            <div className="flex align-items-center gap-2">
-              <i className="pi pi-tag"></i>
-              <span className="font-semibold">{flor.categoria}</span>
-            </div>
-            <Tag value={flor.estatus} severity={getSeverity(flor)}></Tag>
-          </div>
-
-          <div className="flex flex-column align-items-center gap-3 py-5">
-            <img className="shadow-2 border-round" src={`${flor.imagen}`} alt={`${flor.nombre}`} style={{ width: '200px', height: '200px' }} />
-            <div className="text-2xl font-bold">{flor.nombre}</div>
-            <span className="text-2xl font-bold">${flor.precio}</span>
-            {/* <Rating value={flor.rating} readOnly cancel={false}></Rating> */}
-          </div>
-
-          <div className="flex align-items-center justify-content-between">
-            <Button icon="pi pi-heart" rounded severity="help" aria-label="Favorite" className="" />
-            <Button label="Detalles" icon="pi pi-search" className=" font-light ml-2" onClick={() => dialogoFlor(flor)} />
-            <Button label="Agregar" icon="pi pi-shopping-cart" className="font-light ml-2 " disabled={flor.estatus === 'agotado'}></Button>
-          </div>
-
-        </div>
-      </div>
+      <>
+        <Button icon="pi pi-pencil" rounded outlined className="mr-2" onClick={() => editarRegistro(rowData)} />
+        <Button icon="pi pi-trash" rounded outlined severity="danger" onClick={() => confirmarEliminarRegistro(rowData)} />
+      </>
     );
   };
 
-  //--> Cambiar modo de vista
-  const itemTemplate = (flor, layout) => {
-    if (!flor) { return }
+  const botonesCrearModificar = (
+    <>
+      <Button label="Cancelar" icon="pi pi-times" outlined onClick={cerrarDialogoCM} />
+      <Button label="Guardar" icon="pi pi-check" onClick={guardarRegistro} />
+    </>
+  );
 
-    if (layout === 'list') return listItem(flor);
-    else if (layout === 'grid') return gridItem(flor);
-  };
+  const botonesEliminarRegistro = (
+    <>
+      <Button label="No" icon="pi pi-times" outlined onClick={cerrarDialogoEliminarRegistro} />
+      <Button label="Si" icon="pi pi-check" severity="danger" onClick={eliminarRegistro} />
+    </>
+  );
 
-  const iniciarBusqueda = () => {
-    let floresFiltradas
-    floresFiltradas = datosFlores.filter(flor => buscador == flor.nombre)
-    if (floresFiltradas.length === 0) { floresFiltradas = datosFlores.filter(flor => buscador === flor.categoria) }
-    if (floresFiltradas.length === 0) { floresFiltradas = datosFlores.filter(flor => buscador === flor.estatus) }
-    if (floresFiltradas.length === 0) { floresFiltradas = datosFlores.filter(flor => buscador == flor.precio) }
-    setFlores(floresFiltradas)
-  }
-
-  const limpiarBusqueda = () => {
-    setBuscador("")
-    setFlores(datosFlores)
-  }
-
-  //--> Barra para cambiar modo de vista
-  const header = () => {
-    return (
-      <div className="flex justify-content-between">
-        <div className="p-inputgroup w-4">
-          <Button icon="pi pi-search" onClick={iniciarBusqueda} />
-          <InputText placeholder="Buscar por categoria" value={buscador} onChange={e => setBuscador(e.target.value)} />
-          <Button icon="pi pi-times" onClick={limpiarBusqueda} disabled={buscador ? false : true} />
-        </div>
-
-        <DataViewLayoutOptions layout={layout} onChange={(e) => setLayout(e.value)} />
-      </div>
-    );
-  };
-
-  //----------------| Funciones para dialogo |----------------
-  const dialogoFlor = (flor) => {
-    setMostrarDialog(true)
-    setDetallesFlor(flor)
-  }
-
-  const cerrarDialogo = () => {
-    setMostrarDialog(false)
-    setDetallesFlor({})
-  }
-
-  const botonesDialogo = (
-    <><Button label="Cerrar" icon="pi pi-times" onClick={cerrarDialogo} className="p-button-text" /></>
-  )
+  const botonesEliminarRegistros = (
+    <>
+      <Button label="No" icon="pi pi-times" outlined onClick={cerrarDialogoEliminarRegistros} />
+      <Button label="Si" icon="pi pi-check" severity="danger" onClick={deleteSelectedProducts} />
+    </>
+  );
 
   //----------------| Valor que regresara |----------------
   return (
@@ -192,29 +244,119 @@ const CatalogoFlores = () => {
       description="Acceso al catalogo de flores"
     >
       <div className="grid">
+        <Toast ref={toast} />
         <div className="col-12">
           <div className="card">
+            <Toolbar className="mb-4" left={botonIzquierda} right={botonDerecha} />
 
-            <h5>Flores</h5>
-            <DataView value={flores} itemTemplate={itemTemplate} layout={layout} header={header()} />
+            <DataTable
+              ref={dt} value={products} selection={selectedProducts} onSelectionChange={(e) => setSelectedProducts(e.value)}
+              paginator rows={10} rowsPerPageOptions={[5, 10, 25]} showGridlines
+              paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+              currentPageReportTemplate="Mostrando {first} - {last} de {totalRecords} registros"
+              globalFilter={globalFilter} header={cabezal}
+            >
+              <Column selectionMode="multiple" exportable={false} />
+              <Column field="id" header="ID" sortable style={{ minWidth: '12rem', textAlign: "center" }} />
+              <Column field="nombre" header="Nombre" sortable style={{ minWidth: '16rem', textAlign: "center" }} />
+              <Column field="precio" header="Precio" body={plantillaPrecio} sortable
+                style={{ minWidth: '8rem', textAlign: "center" }} />
+              <Column field="categoria" header="Categoria" sortable style={{ minWidth: '10rem', textAlign: "center" }} />
+              {/* <Column field="rating" header="Reviews" body={ratingBodyTemplate} sortable style={{ minWidth: '12rem' }}></Column> */}
+              <Column field="image" header="Imagenes" body={plantillaImagen} />
+              <Column field="estatus" header="Estatus" body={plantillaEstatus} sortable
+                style={{ minWidth: '12rem', textAlign: "center" }} />
+              <Column header="Editar" body={botonesAccion} exportable={false} style={{ minWidth: '12rem' }} />
+            </DataTable>
 
             <Dialog
-              header={`Detalles de ${detallesFlor.nombre}`}
-              visible={mostrarDialog} onHide={cerrarDialogo}
-              footer={botonesDialogo} style={{ width: '35vw' }}
+              visible={productDialog} style={{ width: '32rem' }} breakpoints={{ '960px': '75vw', '641px': '90vw' }} header="Detalles de flor" modal className="p-fluid" footer={botonesCrearModificar} onHide={cerrarDialogoCM}
             >
-              <div className="flex justify-content-center">
-                <img src={detallesFlor.imagen} style={{ width: '200px', height: '200px' }} />
+              {product.image && (
+                <img
+                  // src={`https://primefaces.org/cdn/primereact/images/product/${product.image}`}
+                  alt={product.image} className="product-image block m-auto pb-3" />
+              )}
+              <div className="field">
+                <label htmlFor="nombre" className="font-bold">Nombre</label>
+                <InputText
+                  id="nombre" value={product.nombre} onChange={(e) => cambiarString(e, 'nombre')}
+                  required autoFocus className={classNames({ 'p-invalid': submitted && !product.name })}
+                />
+                {submitted && !product.nombre && <small className="p-error">El nombre es obligatorio.</small>}
               </div>
-              <div className="mt-5">
-                <p className="my-2"><span className="font-semibold text-lg">Nombre: </span>{detallesFlor.nombre}</p>
-                <p className="my-2"><span className="font-semibold text-lg">Precio: </span>${detallesFlor.precio}</p>
-                <p className="my-2"><span className="font-semibold text-lg">Categoria: </span>{detallesFlor.categoria}</p>
-                <p className="my-2"><span className="font-semibold text-lg">Estatus: </span>{detallesFlor.estatus}</p>
-                <p className="my-2"><span className="font-semibold text-lg">Descripcion: </span>{detallesFlor.descripcion}</p>
+              <div className="formgrid grid">
+                <div className="field col">
+                  <label htmlFor="precio" className="font-bold">Precio</label>
+                  <InputNumber
+                    id="precio" value={product.precio} onValueChange={(e) => cambiarNumero(e, 'precio')}
+                    mode="currency" currency="USD" locale="en-US"
+                  />
+                </div>
+                <div className="field col">
+                  <label htmlFor="categoria" className="font-bold">Categoria/Evento</label>
+                  <Dropdown
+                    value={product.categoria} onChange={(e) => cambiarString(e, 'categoria')}
+                    options={listaCategorias} optionLabel="nombre" optionValue="valor"
+                    placeholder="Escoge una categoria" className="w-full md:w-14rem" />
+                </div>
+              </div>
+
+              <div className="field">
+                <label className="mb-3 font-bold">Estatus</label>
+                <div className="formgrid grid">
+                  <div className="field-radiobutton col-4">
+                    <RadioButton
+                      inputId="estatus1" name="estatus" value="DISPONIBLE" onChange={cambiarEstatus}
+                      checked={product.estatus === 'DISPONIBLE'} />
+                    <label htmlFor="estatus1">Disponible</label>
+                  </div>
+                  <div className="field-radiobutton col-4">
+                    <RadioButton
+                      inputId="estatus2" name="estatus" value="POCOS" onChange={cambiarEstatus}
+                      checked={product.estatus === 'POCOS'} />
+                    <label htmlFor="estatus2">Pocos</label>
+                  </div>
+                  <div className="field-radiobutton col-4">
+                    <RadioButton
+                      inputId="estatus3" name="estatus" value="AGOTADO" onChange={cambiarEstatus}
+                      checked={product.estatus === 'AGOTADO'} />
+                    <label htmlFor="estatus3">Agotado</label>
+                  </div>
+                </div>
+              </div>
+              <FileUpload mode="basic" name="demo[]" url="/api/upload" accept="image/*" maxFileSize={1000000} />
+              {/* <FileUpload mode="basic" accept="image/*" maxFileSize={1000000}
+                auto chooseLabel="Browse" /> */}
+              {mensajeRespuesta && (
+                <div className="mt-4">
+                  <Message severity="error" text={mensajeRespuesta} />
+                </div>
+              )}
+
+            </Dialog>
+
+            <Dialog
+              visible={deleteProductDialog} style={{ width: '32rem' }}
+              breakpoints={{ '960px': '75vw', '641px': '90vw' }} header="Confirm" modal footer={botonesEliminarRegistro}
+              onHide={cerrarDialogoEliminarRegistro}
+            >
+              <div className="confirmation-content">
+                <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: '2rem' }} />
+                {product && (
+                  <span>
+                    Estas seguro de eliminar <b>{product.nombre}</b>?
+                  </span>
+                )}
               </div>
             </Dialog>
 
+            <Dialog visible={deleteProductsDialog} style={{ width: '32rem' }} breakpoints={{ '960px': '75vw', '641px': '90vw' }} header="Confirm" modal footer={botonesEliminarRegistros} onHide={cerrarDialogoEliminarRegistros}>
+              <div className="confirmation-content">
+                <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: '2rem' }} />
+                {product && <span>Estas seguro de eliminar los registros?</span>}
+              </div>
+            </Dialog>
           </div>
         </div>
       </div>

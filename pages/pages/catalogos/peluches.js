@@ -1,223 +1,364 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import Layout from "@/layout/layout"
-import { Button } from 'primereact/button';
-import { DataView, DataViewLayoutOptions } from 'primereact/dataview';
-import { Paginator } from 'primereact/paginator';
-// import { Rating } from 'primereact/rating';
+//--> Componentes primeReact
 import { Tag } from 'primereact/tag';
-import { InputText } from 'primereact/inputtext';
+import { classNames } from 'primereact/utils';
+import { Button } from 'primereact/button';
+import { FileUpload } from 'primereact/fileupload';
 import { Dialog } from 'primereact/dialog';
-
-
+import { InputText } from 'primereact/inputtext';
+import { InputNumber } from 'primereact/inputnumber';
+import { DataTable } from 'primereact/datatable';
+import { Column } from 'primereact/column';
+import { Toast } from 'primereact/toast';
+import { Toolbar } from 'primereact/toolbar';
+import { Dropdown } from 'primereact/dropdown';
+import { RadioButton } from 'primereact/radiobutton';
+import { Message } from 'primereact/message';
+//--> Funciones propias
+import { objetoVacio } from "@/components/catalogos/objetovacio";
+import { formatoPrecio } from "@/helpers/funciones";
+import { listaCategorias } from "@/components/catalogos/listacategorias";
+import { camposVacios } from "@/components/mensajesNotificaciones/mensajes";
 
 const CatalogoFlores = () => {
+  //--> Estructura de objeto vacio
+  let pelucheVacio = objetoVacio
+
   //----------------| Lista de variables |----------------
-  const [peluches, setPeluches] = useState([])
-  const [layout, setLayout] = useState('grid');
-  //-->Detalles de flor
-  const [detallesPeluche, setDetallesPeluche] = useState({})
-  const [mostrarDialog, setMostrarDialog] = useState(false)
-  //--> Buscador
-  const [buscador, setBuscador] = useState('')
+  //--> Registros
+  const [product, setProduct] = useState(pelucheVacio);
+  const [products, setProducts] = useState(null);
+  //--> Dialogos
+  const [productDialog, setProductDialog] = useState(false);
+  const [deleteProductDialog, setDeleteProductDialog] = useState(false);
+  const [deleteProductsDialog, setDeleteProductsDialog] = useState(false);
+  //--> Otros
+  const [selectedProducts, setSelectedProducts] = useState(null);
+  const [submitted, setSubmitted] = useState(false);
+  const [globalFilter, setGlobalFilter] = useState(null);
+  //--> Mensajes
+  const [mensajeRespuesta, setMensajeRespuesta] = useState('')
+  //--> Especiales
+  const toast = useRef(null);
+  const dt = useRef(null);
 
-  //--> Ejecucion en segundo plano
-  const datosPeluches = [
-    {
-      nombre: "Tiburon Gato", precio: 14.90, categoria: "san valentin", estatus: "disponible",
-      imagen: "https://http2.mlstatic.com/D_NQ_NP_2X_778361-MLM69281757162_052023-F.webp", descripcion: "Descripcion de tiburon"
-    },
-    {
-      nombre: "Jirafa", precio: 30.29, categoria: "cumpleaños", estatus: "agotado",
-      imagen: "https://s.cornershopapp.com/product-images/2343555.jpg?versionId=xPvvkAxaVapD_aHU1QfX81cIZDBccvis",
-      descripcion: "Descripcion de jirafa"
-    },
-    {
-      nombre: "Oso Panda", precio: 8.40, categoria: "san valentin", estatus: "pocos",
-      imagen: "https://m.media-amazon.com/images/I/41dFyXgb9sL._SL500_.jpg",
-      descripcion: "Descripcion de oso panda"
-    },
-    {
-      nombre: "Stich", precio: 12.67, categoria: "cumpleaños", estatus: "pocos",
-      imagen: "https://http2.mlstatic.com/D_NQ_NP_929622-MLM51003735224_082022-O.jpg", descripcion: "Descripcion de stich"
-    },
-    {
-      nombre: "Unicornio", precio: 50.01, categoria: "cumpleaños", estatus: "disponible",
-      imagen: "https://minisomx.vtexassets.com/arquivos/ids/218097/Peluche-Miniso-Unicornio-Felpa-Rosa-16x28-cm-1-12948.jpg?v=637952098028100000", descripcion: "Descripcion de unicornio"
-    },
-    {
-      nombre: "Delfin", precio: 84.69, categoria: "san valentin", estatus: "agotado",
-      imagen: "https://puuf.mx/wp-content/uploads/2023/02/delfin-de-peluche-azul-30-cm.jpg", descripcion: "Descripcion de delfin"
-    },
-  ]
-  useEffect(() => { setPeluches(datosPeluches) }, [])
+  //--> Cargar cuando se renderiza
+  useEffect(() => {
+    const datos = [
+      { id: 1, nombre: 'Oso', precio: 71, categoria: 'Fiestas', imagenes: null, estatus: 'DISPONIBLE' },
+      { id: 2, nombre: 'Jirafa', precio: 37, categoria: 'San valentin', imagenes: null, estatus: 'POCOS' },
+      { id: 3, nombre: 'Tiburon', precio: 89, categoria: 'Año nuevo', imagenes: null, estatus: 'AGOTADO' },
+      { id: 4, nombre: 'Panda', precio: 34, categoria: 'Cumpleaños', imagenes: null, estatus: 'DISPONIBLE' },
+    ]
+    setProducts(datos)
+  }, []);
 
-  //--> Indicar estado de la flor
-  const getSeverity = (peluche) => {
-    switch (peluche.estatus) {
-      case 'disponible':
-        return 'success';
 
-      case 'pocos':
-        return 'warning';
+  //----------------| Interaccion con dialogos |----------------
+  const abrirDialogoCM = () => {
+    setProduct(pelucheVacio);
+    setSubmitted(false);
+    setProductDialog(true);
+  };
 
-      case 'agotado':
-        return 'danger';
+  const cerrarDialogoCM = () => {
+    setSubmitted(false);
+    setProductDialog(false);
+  };
 
-      default:
-        return null;
+  const cerrarDialogoEliminarRegistro = () => { setDeleteProductDialog(false) };
+
+  const cerrarDialogoEliminarRegistros = () => { setDeleteProductsDialog(false) }
+
+  //----------------| Funciones Back-end |----------------
+  const guardarRegistro = () => {
+    //--> Validacion antes de envio
+    if (Object.values(product).includes('')) {
+      setMensajeRespuesta(camposVacios)
+      setTimeout(() => { setMensajeRespuesta('') }, 3000)
+      return
+    }
+
+    setSubmitted(true);
+    //--> Editar registro
+    if (product.id) {
+      const arregloModificado = products.map((regis) => regis.id === product.id ? product : regis)
+      setProducts(arregloModificado)
+      toast.current.show({
+        severity: 'success', summary: 'Peluche actualizado', detail: 'Se ha actualizado el peluche', life: 3000
+      });
+    }
+    //--> Crear registro
+    else {
+      const arregloNuevo = [...products, product]
+      setProducts(arregloNuevo)
+      toast.current.show({ severity: 'success', summary: 'Peluche creado', detail: 'El peluche ha sido creada', life: 3000 });
+    }
+    setProduct(pelucheVacio);
+    setProductDialog(false);
+  };
+
+  const editarRegistro = (product) => {
+    setProduct({ ...product });
+    setProductDialog(true);
+  };
+
+  const confirmarEliminarRegistro = (product) => {
+    setProduct(product);
+    setDeleteProductDialog(true);
+  };
+
+  const eliminarRegistro = () => {
+    //--> Registros que no sean los seleccionados
+    let _products = products.filter((val) => val.id !== product.id);
+
+    setProducts(_products);
+    setDeleteProductDialog(false);
+    setProduct(pelucheVacio);
+    toast.current.show({
+      severity: 'success', summary: 'Peluche eliminado', detail: 'Se ha eliminado correctamente el peluche', life: 3000
+    });
+  };
+
+  const exportCSV = () => { dt.current.exportCSV() }
+
+  const confirmDeleteSelected = () => { setDeleteProductsDialog(true) }
+
+  const deleteSelectedProducts = () => {
+    //--> Registros que no son seleccionados
+    let _products = products.filter((val) => !selectedProducts.includes(val));
+
+    setProducts(_products);
+    setDeleteProductsDialog(false);
+    setSelectedProducts(null);
+    toast.current.show({
+      severity: 'success', summary: 'Peluches eliminados', detail: 'Los peluches fueron eliminados', life: 3000
+    });
+  };
+
+  //----------------| Funciones para editar |----------------
+  const cambiarEstatus = (e) => {
+    let _product = { ...product };
+
+    _product['estatus'] = e.value;
+    setProduct(_product);
+  };
+
+  const cambiarString = (e, name) => {
+    const val = (e.target && e.target.value) || '';
+    let _product = { ...product };
+    _product[`${name}`] = val;
+    setProduct(_product);
+  };
+
+  const cambiarNumero = (e, name) => {
+    const val = e.value || 0;
+    let _product = { ...product };
+    _product[`${name}`] = val;
+    setProduct(_product);
+  };
+
+  //----------------| Plantillas |----------------
+  const plantillaImagen = (rowData) => {
+    return <img
+      // src={`https://primefaces.org/cdn/primereact/images/product/${rowData.image}`}
+      alt={rowData.image} className="shadow-2 border-round" style={{ width: '64px' }} />;
+  };
+
+  const plantillaPrecio = (rowData) => { return formatoPrecio(rowData.precio) }
+
+  const ratingBodyTemplate = (rowData) => {
+    return <Rating value={rowData.rating} readOnly cancel={false} />;
+  };
+
+  const plantillaEstatus = (rowData) => {
+    return <Tag value={rowData.estatus} severity={getSeverity(rowData)}></Tag>;
+  };
+
+  const getSeverity = (product) => {
+    switch (product.estatus) {
+      case 'DISPONIBLE': return 'success';
+      case 'POCOS': return 'warning';
+      case 'AGOTADO': return 'danger';
+      default: return null;
     }
   };
 
-  //--> Modo de vista: lista
-  const listItem = (peluche) => {
+  //----------------| Botones de dialogos |----------------
+  const cabezal = (
+    <div className="flex flex-wrap gap-2 align-items-center justify-content-between">
+      <h4 className="m-0">Control de peluches</h4>
+      <span className="p-input-icon-left">
+        <i className="pi pi-search" />
+        <InputText type="search" onInput={(e) => setGlobalFilter(e.target.value)} placeholder="Buscar..." />
+      </span>
+    </div>
+  );
+
+  const botonIzquierda = () => {
     return (
-      <div className="col-12">
-        <div className="flex flex-column xl:flex-row xl:align-items-start p-4 gap-4">
-
-          <img className="w-9 sm:w-16rem xl:w-10rem shadow-2 block xl:block mx-auto border-round" src={`${peluche.imagen}`} alt={`${peluche.nombre}`} style={{ width: '200px', height: '200px' }} />
-          <div className="flex flex-column sm:flex-row justify-content-between align-items-center xl:align-items-start flex-1 gap-4">
-            <div className="flex flex-column align-items-center sm:align-items-start gap-3">
-              <div className="text-2xl font-bold text-900">{peluche.nombre}</div>
-              {/* <Rating value={peluche.rating} readOnly cancel={false}></Rating> */}
-              <div className="flex align-items-center gap-3">
-                <Tag value={peluche.estatus} severity={getSeverity(peluche)}></Tag>
-                <span className="flex align-items-center gap-2">
-                  <i className="pi pi-tag"></i>
-                  <span className="font-semibold">{peluche.categoria}</span>
-                </span>
-              </div>
-              <span className="text-2xl font-semibold mt-8">${peluche.precio}</span>
-            </div>
-
-            <div className="flex sm:flex-column align-items-center sm:align-items-end gap-3 sm:gap-2 mt-6">
-              <Button label="Favoritos" icon="pi pi-heart" rounded severity="help"
-                aria-label="Favorite" className="p-button-rounded" />
-              <Button label="Agregar" icon="pi pi-shopping-cart" className="p-button-rounded"
-                disabled={peluche.estatus === 'agotado'} />
-              <Button label="Detalles" icon="pi pi-external-link" className="p-button-rounded"
-                onClick={() => dialogoFlor(flor)} />
-            </div>
-
-          </div>
-        </div>
+      <div className="flex flex-wrap gap-2">
+        <Button label="New" icon="pi pi-plus" severity="success" onClick={abrirDialogoCM} />
+        <Button label="Delete" icon="pi pi-trash" severity="danger" onClick={confirmDeleteSelected} disabled={!selectedProducts || !selectedProducts.length} />
       </div>
     );
   };
 
-  //--> Modo de vista: grid
-  const gridItem = (peluche) => {
+  const botonDerecha = () => {
+    return <Button label="Export" icon="pi pi-upload" className="p-button-help" onClick={exportCSV} />;
+  };
+
+  const botonesAccion = (rowData) => {
     return (
-      <div className="col-12 sm:col-6 lg:col-12 xl:col-4 p-2">
-        <div className="p-4 border-1 surface-border surface-card border-round">
-
-          <div className="flex flex-wrap align-items-center justify-content-between gap-2">
-            <div className="flex align-items-center gap-2">
-              <i className="pi pi-tag"></i>
-              <span className="font-semibold">{peluche.categoria}</span>
-            </div>
-            <Tag value={peluche.estatus} severity={getSeverity(peluche)}></Tag>
-          </div>
-
-          <div className="flex flex-column align-items-center gap-3 py-5">
-            <img className="shadow-2 border-round" src={`${peluche.imagen}`} alt={`${peluche.nombre}`} style={{ width: '200px', height: '200px' }} />
-            <div className="text-2xl font-bold">{peluche.nombre}</div>
-            <span className="text-2xl font-bold">${peluche.precio}</span>
-            {/* <Rating value={peluche.rating} readOnly cancel={false}></Rating> */}
-          </div>
-
-          <div className="flex align-items-center justify-content-between">
-            <Button icon="pi pi-heart" rounded severity="help" aria-label="Favorite" className="" />
-            <Button label="Detalles" icon="pi pi-search" className=" font-light ml-2" onClick={() => dialogoPeluche(peluche)} />
-            <Button label="Agregar" icon="pi pi-shopping-cart" className="font-light ml-2 " disabled={peluche.estatus === 'agotado'}></Button>
-          </div>
-
-        </div>
-      </div>
+      <>
+        <Button icon="pi pi-pencil" rounded outlined className="mr-2" onClick={() => editarRegistro(rowData)} />
+        <Button icon="pi pi-trash" rounded outlined severity="danger" onClick={() => confirmarEliminarRegistro(rowData)} />
+      </>
     );
   };
 
-  //--> Cambiar modo de vista
-  const itemTemplate = (peluche, layout) => {
-    if (!peluche) { return }
+  const botonesCrearModificar = (
+    <>
+      <Button label="Cancelar" icon="pi pi-times" outlined onClick={cerrarDialogoCM} />
+      <Button label="Guardar" icon="pi pi-check" onClick={guardarRegistro} />
+    </>
+  );
 
-    if (layout === 'list') return listItem(peluche);
-    else if (layout === 'grid') return gridItem(peluche);
-  };
+  const botonesEliminarRegistro = (
+    <>
+      <Button label="No" icon="pi pi-times" outlined onClick={cerrarDialogoEliminarRegistro} />
+      <Button label="Si" icon="pi pi-check" severity="danger" onClick={eliminarRegistro} />
+    </>
+  );
 
-  const iniciarBusqueda = () => {
-    let peluchesFiltrados
-    peluchesFiltrados = datosPeluches.filter(peluche => buscador == peluche.nombre)
-    if (peluchesFiltrados.length === 0) { peluchesFiltrados = datosPeluches.filter(peluche => buscador === peluche.categoria) }
-    if (peluchesFiltrados.length === 0) { peluchesFiltrados = datosPeluches.filter(peluche => buscador === peluche.estatus) }
-    if (peluchesFiltrados.length === 0) { peluchesFiltrados = datosPeluches.filter(peluche => buscador == peluche.precio) }
-    setPeluches(peluchesFiltrados)
-  }
-
-  const limpiarBusqueda = () => {
-    setBuscador("")
-    setPeluches(datosPeluches)
-  }
-
-  //--> Barra para cambiar modo de vista
-  const header = () => {
-    return (
-      <div className="flex justify-content-between">
-        <div className="p-inputgroup w-4">
-          <Button icon="pi pi-search" onClick={iniciarBusqueda} />
-          <InputText placeholder="Buscar por categoria" value={buscador} onChange={e => setBuscador(e.target.value)} />
-          <Button icon="pi pi-times" onClick={limpiarBusqueda} disabled={buscador ? false : true} />
-        </div>
-
-        <DataViewLayoutOptions layout={layout} onChange={(e) => setLayout(e.value)} />
-      </div>
-    );
-  };
-
-  //----------------| Funciones para dialogo |----------------
-  const dialogoPeluche = (peluche) => {
-    setMostrarDialog(true)
-    setDetallesPeluche(peluche)
-  }
-
-  const cerrarDialogo = () => {
-    setMostrarDialog(false)
-    setDetallesPeluche({})
-  }
-
-  const botonesDialogo = (
-    <><Button label="Cerrar" icon="pi pi-times" onClick={cerrarDialogo} className="p-button-text" /></>
-  )
+  const botonesEliminarRegistros = (
+    <>
+      <Button label="No" icon="pi pi-times" outlined onClick={cerrarDialogoEliminarRegistros} />
+      <Button label="Si" icon="pi pi-check" severity="danger" onClick={deleteSelectedProducts} />
+    </>
+  );
 
   //----------------| Valor que regresara |----------------
   return (
     <Layout
-      title="Flores"
-      description="Acceso al catalogo de flores"
+      title="Peluches"
+      description="Acceso al catalogo de peluches"
     >
       <div className="grid">
+        <Toast ref={toast} />
         <div className="col-12">
           <div className="card">
+            <Toolbar className="mb-4" left={botonIzquierda} right={botonDerecha} />
 
-            <h5>Flores</h5>
-            <DataView value={peluches} itemTemplate={itemTemplate} layout={layout} header={header()} />
+            <DataTable
+              ref={dt} value={products} selection={selectedProducts} onSelectionChange={(e) => setSelectedProducts(e.value)}
+              paginator rows={10} rowsPerPageOptions={[5, 10, 25]} showGridlines
+              paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+              currentPageReportTemplate="Mostrando {first} - {last} de {totalRecords} registros"
+              globalFilter={globalFilter} header={cabezal}
+            >
+              <Column selectionMode="multiple" exportable={false} />
+              <Column field="id" header="ID" sortable style={{ minWidth: '12rem', textAlign: "center" }} />
+              <Column field="nombre" header="Nombre" sortable style={{ minWidth: '16rem', textAlign: "center" }} />
+              <Column field="precio" header="Precio" body={plantillaPrecio} sortable
+                style={{ minWidth: '8rem', textAlign: "center" }} />
+              <Column field="categoria" header="Categoria" sortable style={{ minWidth: '10rem', textAlign: "center" }} />
+              {/* <Column field="rating" header="Reviews" body={ratingBodyTemplate} sortable style={{ minWidth: '12rem' }}></Column> */}
+              <Column field="image" header="Imagenes" body={plantillaImagen} />
+              <Column field="estatus" header="Estatus" body={plantillaEstatus} sortable
+                style={{ minWidth: '12rem', textAlign: "center" }} />
+              <Column header="Editar" body={botonesAccion} exportable={false} style={{ minWidth: '12rem' }} />
+            </DataTable>
 
             <Dialog
-              header={`Detalles de ${detallesPeluche.nombre}`}
-              visible={mostrarDialog} onHide={cerrarDialogo}
-              footer={botonesDialogo} style={{ width: '35vw' }}
+              visible={productDialog} style={{ width: '32rem' }} breakpoints={{ '960px': '75vw', '641px': '90vw' }} header="Detalles del peluche" modal className="p-fluid" footer={botonesCrearModificar} onHide={cerrarDialogoCM}
             >
-              <div className="flex justify-content-center">
-                <img src={detallesPeluche.imagen} style={{ width: '200px', height: '200px' }} />
+              {product.image && (
+                <img
+                  // src={`https://primefaces.org/cdn/primereact/images/product/${product.image}`}
+                  alt={product.image} className="product-image block m-auto pb-3" />
+              )}
+              <div className="field">
+                <label htmlFor="nombre" className="font-bold">Nombre</label>
+                <InputText
+                  id="nombre" value={product.nombre} onChange={(e) => cambiarString(e, 'nombre')}
+                  required autoFocus className={classNames({ 'p-invalid': submitted && !product.name })}
+                />
+                {submitted && !product.nombre && <small className="p-error">El nombre es obligatorio.</small>}
               </div>
-              <div className="mt-5">
-                <p className="my-2"><span className="font-semibold text-lg">Nombre: </span>{detallesPeluche.nombre}</p>
-                <p className="my-2"><span className="font-semibold text-lg">Precio: </span>${detallesPeluche.precio}</p>
-                <p className="my-2"><span className="font-semibold text-lg">Categoria: </span>{detallesPeluche.categoria}</p>
-                <p className="my-2"><span className="font-semibold text-lg">Estatus: </span>{detallesPeluche.estatus}</p>
-                <p className="my-2"><span className="font-semibold text-lg">Descripcion: </span>{detallesPeluche.descripcion}</p>
+              <div className="formgrid grid">
+                <div className="field col">
+                  <label htmlFor="precio" className="font-bold">Precio</label>
+                  <InputNumber
+                    id="precio" value={product.precio} onValueChange={(e) => cambiarNumero(e, 'precio')}
+                    mode="currency" currency="USD" locale="en-US"
+                  />
+                </div>
+                <div className="field col">
+                  <label htmlFor="categoria" className="font-bold">Categoria/Evento</label>
+                  <Dropdown
+                    value={product.categoria} onChange={(e) => cambiarString(e, 'categoria')}
+                    options={listaCategorias} optionLabel="nombre" optionValue="valor"
+                    placeholder="Escoge una categoria" className="w-full md:w-14rem" />
+                </div>
+              </div>
+
+              <div className="field">
+                <label className="mb-3 font-bold">Estatus</label>
+                <div className="formgrid grid">
+                  <div className="field-radiobutton col-4">
+                    <RadioButton
+                      inputId="estatus1" name="estatus" value="DISPONIBLE" onChange={cambiarEstatus}
+                      checked={product.estatus === 'DISPONIBLE'} />
+                    <label htmlFor="estatus1">Disponible</label>
+                  </div>
+                  <div className="field-radiobutton col-4">
+                    <RadioButton
+                      inputId="estatus2" name="estatus" value="POCOS" onChange={cambiarEstatus}
+                      checked={product.estatus === 'POCOS'} />
+                    <label htmlFor="estatus2">Pocos</label>
+                  </div>
+                  <div className="field-radiobutton col-4">
+                    <RadioButton
+                      inputId="estatus3" name="estatus" value="AGOTADO" onChange={cambiarEstatus}
+                      checked={product.estatus === 'AGOTADO'} />
+                    <label htmlFor="estatus3">Agotado</label>
+                  </div>
+                </div>
+              </div>
+              <FileUpload mode="basic" name="demo[]" url="/api/upload" accept="image/*" maxFileSize={1000000} />
+              {/* <FileUpload mode="basic" accept="image/*" maxFileSize={1000000}
+                auto chooseLabel="Browse" /> */}
+              {mensajeRespuesta && (
+                <div className="mt-4">
+                  <Message severity="error" text={mensajeRespuesta} />
+                </div>
+              )}
+
+            </Dialog>
+
+            <Dialog
+              visible={deleteProductDialog} style={{ width: '32rem' }}
+              breakpoints={{ '960px': '75vw', '641px': '90vw' }} header="Confirm" modal footer={botonesEliminarRegistro}
+              onHide={cerrarDialogoEliminarRegistro}
+            >
+              <div className="confirmation-content">
+                <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: '2rem' }} />
+                {product && (
+                  <span>
+                    Estas seguro de eliminar <b>{product.nombre}</b>?
+                  </span>
+                )}
               </div>
             </Dialog>
 
+            <Dialog visible={deleteProductsDialog} style={{ width: '32rem' }} breakpoints={{ '960px': '75vw', '641px': '90vw' }} header="Confirm" modal footer={botonesEliminarRegistros} onHide={cerrarDialogoEliminarRegistros}>
+              <div className="confirmation-content">
+                <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: '2rem' }} />
+                {product && <span>Estas seguro de eliminar los registros?</span>}
+              </div>
+            </Dialog>
           </div>
         </div>
       </div>
