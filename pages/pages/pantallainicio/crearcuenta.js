@@ -95,7 +95,7 @@ const CrearCuenta = () => {
     }
 
     try {
-      const objetoCrearUsuario = { nombreCliente: nombre, emailCliente: email, passwordCliente: password }
+      const objetoCrearUsuario = { nombreAdministrador: nombre, emailAdministrador: email, passwordAdministrador: password }
       const respuesta = await axios.post(nuevoUsuario, objetoCrearUsuario)
       //--> Limpiar campos
       setEmail('')
@@ -137,9 +137,9 @@ const CrearCuenta = () => {
   return (
     <>
       <Head>
-        <title>Jardin del Eden - Crear usuario</title>
+        <title>Administrador - Crear usuario</title>
         <meta charSet="UTF-8" />
-        <meta name="description" content="El usuario podra darse de alta en el sistema" />
+        <meta name="description" content="El administrador podra darse de alta en el sistema" />
         <meta name="robots" content="index, follow" />
         <meta name="viewport" content="initial-scale=1, width=device-width" />
         <meta property="og:type" content="website"></meta>

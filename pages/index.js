@@ -70,18 +70,21 @@ export default function Home() {
       return
     } else { setEstiloPassword('') }
     setMensajeRespuesta('')
-    router.push('/pages/dashboard')
     //--> Validar envio a back-end
-    // try {
-    //   const respuesta = await axios.post(iniciarSesion, { emailCliente: email, passwordCliente: password })
-    //   if (respuesta.status === 200) { setTimeout(() => { router.push('/pages/dashboard') }, 1000) }
-    // } catch (error) {
-    //   setMensajeRespuesta(error.response.data.msg)
-    //   setEstiloRespuesta('error')
-    //   setEstiloEmail('p-invalid')
-    //   setEstiloPassword('p-invalid')
-    //   setTimeout(() => { setMensajeRespuesta('') }, 3000);
-    // }
+    try {
+      const respuesta = await axios.post(iniciarSesion, { emailAdministrador: email, passwordAdministrador: password })
+      if (respuesta.status === 200) {
+        localStorage.setItem('token', respuesta.data.token);
+        // console.log(respuesta.data.token)
+        setTimeout(() => { router.push('/pages/dashboard') }, 1000)
+      }
+    } catch (error) {
+      setMensajeRespuesta(error.response.data.msg)
+      setEstiloRespuesta('error')
+      setEstiloEmail('p-invalid')
+      setEstiloPassword('p-invalid')
+      setTimeout(() => { setMensajeRespuesta('') }, 3000);
+    }
   }
 
   const recuperarPassword = async () => {
@@ -101,28 +104,28 @@ export default function Home() {
       return
     } else { setEstiloEmailRec('') }
 
-    router.push('/pages/pantallainicio/tokenresetear')
+    // router.push('/pages/pantallainicio/tokenresetear')
 
-    // try {
-    //   const respuesta = await axios.post(resetearPassword, { emailCliente: emailrecuperar })
-    //   if (respuesta.status === 200) {
-    //     // --> Limpiar variables
-    //     setEmailrecuperar('')
+    try {
+      const respuesta = await axios.post(resetearPassword, { emailAdministrador: emailrecuperar })
+      if (respuesta.status === 200) {
+        // --> Limpiar variables
+        setEmailrecuperar('')
 
-    //     //--> Mostrar estado de la peticion
-    //     setEstiloRespuesta('success')
-    //     setMensajeRespuesta(resetearExitoso)
+        //--> Mostrar estado de la peticion
+        setEstiloRespuesta('success')
+        setMensajeRespuesta(resetearExitoso)
 
-    //     //--> Redireccionar
-    //     setTimeout(() => { router.push('/pages/pantallainicio/tokenresetear') }, 1000)
-    //   }
-    // } catch (error) {
-    //   setEstiloEmailRec('p-invalid')
-    //   setMensajeRespuesta(error.response.data.msg)
-    //   setEstiloRespuesta('error')
+        //--> Redireccionar
+        setTimeout(() => { router.push('/pages/pantallainicio/tokenresetear') }, 1000)
+      }
+    } catch (error) {
+      setEstiloEmailRec('p-invalid')
+      setMensajeRespuesta(error.response.data.msg)
+      setEstiloRespuesta('error')
 
-    //   setTimeout(() => { setMensajeRespuesta('') }, 3000)
-    // }
+      setTimeout(() => { setMensajeRespuesta('') }, 3000)
+    }
   }
 
 
@@ -218,7 +221,7 @@ export default function Home() {
             </components.leftOverLayPanel>
 
             <components.RightOverLayPanel signinIn={signIn}>
-              <components.Title>Bienvenido Administrador!</components.Title>
+              <components.Title>Bienvenido, Administrador!</components.Title>
               <components.Title2>Jardín del Edén</components.Title2>
 
             </components.RightOverLayPanel >

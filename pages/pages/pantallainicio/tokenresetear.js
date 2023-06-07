@@ -11,7 +11,9 @@ import { InputText } from "primereact/inputtext";
 import { useRouter } from 'next/router';
 //--> Componentes propios
 import { temporizador } from '@/helpers/funciones';
-import { campoVacio, longiudTokenInvalida, tokenExpirado, exitoToken, exitoResetPassword, passwordsInValidas, passwordInvalido } from '@/components/mensajesNotificaciones/mensajes';
+import {
+  campoVacio, longiudTokenInvalida, tokenExpirado, exitoToken, exitoResetPassword, passwordsInValidas, passwordInvalido
+} from '@/components/mensajesNotificaciones/mensajes';
 import { cambiarPassword, tokenResetearPassword } from '@/components/mensajesNotificaciones/links';
 
 const TokenResetear = () => {
@@ -211,7 +213,11 @@ const TokenResetear = () => {
         <AppConfig />
       </div>
 
-      <Dialog header="¡Atención!" visible={mostrarDialogo} style={{ width: '50vw' }} onHide={() => setMostrarDialogo(false)}>
+      <Dialog
+        header="Crea una nueva contraseña"
+        visible={mostrarDialogo} style={{ width: '50vw' }} onHide={() => setMostrarDialogo(false)}
+      >
+        <h5>La contraseña debe tener una longitud mínima de 6 caracteres.</h5>
         <div className='flex justify-content-center my-2'>
           <Password
             id="cpassword" placeholder='Escribe tu contraseña'

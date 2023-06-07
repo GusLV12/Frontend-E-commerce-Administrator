@@ -15,9 +15,9 @@ const AppMenu = () => {
     {
       label: 'Catalogos',
       items: [
-        { label: 'Flores', icon: 'pi pi-fw pi-id-card', to: '/pages/catalogos/flores' },
-        { label: 'Peluches', icon: 'pi pi-fw pi-id-card', to: '/pages/catalogos/peluches' },
-        { label: 'Ofertas', icon: 'pi pi-fw pi-tags', to: '/pages/catalogos/ofertas' },
+        { label: 'Productos', icon: 'pi pi-fw pi-database', to: '/pages/catalogos/flores' },
+        // { label: 'Peluches', icon: 'pi pi-fw pi-id-card', to: '/pages/catalogos/peluches' },
+        // { label: 'Ofertas', icon: 'pi pi-fw pi-tags', to: '/pages/catalogos/ofertas' },
       ]
     },
     // {

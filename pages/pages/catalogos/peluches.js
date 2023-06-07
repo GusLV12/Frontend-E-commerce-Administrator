@@ -18,7 +18,7 @@ import { Message } from 'primereact/message';
 //--> Funciones propias
 import { objetoVacio } from "@/components/catalogos/objetovacio";
 import { formatoPrecio } from "@/helpers/funciones";
-import { listaCategorias } from "@/components/catalogos/listacategorias";
+import { listaCategorias } from "@/components/catalogos/listas";
 import { camposVacios } from "@/components/mensajesNotificaciones/mensajes";
 
 const CatalogoFlores = () => {

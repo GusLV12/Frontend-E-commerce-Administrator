@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import Layout from "@/layout/layout"
+import axios from "axios";
 //--> Componentes primeReact
 import { Tag } from 'primereact/tag';
 import { classNames } from 'primereact/utils';
@@ -13,27 +14,33 @@ import { Column } from 'primereact/column';
 import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
 import { Dropdown } from 'primereact/dropdown';
-import { RadioButton } from 'primereact/radiobutton';
 import { Message } from 'primereact/message';
 //--> Funciones propias
 import { objetoVacio } from "@/components/catalogos/objetovacio";
 import { formatoPrecio } from "@/helpers/funciones";
 import { camposVacios } from "@/components/mensajesNotificaciones/mensajes";
-import { listaCategorias } from "@/components/catalogos/listacategorias";
+import { listaTipos } from "@/components/catalogos/listas";
+import { consultarProductos, crearProducto, editarProducto, eliminarProducto } from "@/components/mensajesNotificaciones/links";
 
 const CatalogoFlores = () => {
+  // Token generado desde el login
+  let valorToken
+
   //--> Estructura de objeto vacio
-  let florVacia = objetoVacio
+  let productoVacio = objetoVacio
 
   //----------------| Lista de variables |----------------
   //--> Registros
-  const [product, setProduct] = useState(florVacia);
+  const [product, setProduct] = useState(productoVacio);
   const [products, setProducts] = useState(null);
+  //--> Edicion
+  const [nombreNuevo, setNombreNuevo] = useState('')
   //--> Dialogos
   const [productDialog, setProductDialog] = useState(false);
   const [deleteProductDialog, setDeleteProductDialog] = useState(false);
   const [deleteProductsDialog, setDeleteProductsDialog] = useState(false);
   //--> Otros
+  const [editar, setEditar] = useState(false)
   const [selectedProducts, setSelectedProducts] = useState(null);
   const [submitted, setSubmitted] = useState(false);
   const [globalFilter, setGlobalFilter] = useState(null);
@@ -43,58 +50,163 @@ const CatalogoFlores = () => {
   const toast = useRef(null);
   const dt = useRef(null);
 
-  //--> Cargar cuando se renderiza
-  useEffect(() => {
-    const datos = [
-      { id: 1, nombre: 'Rosa', precio: 60, categoria: 'Fiestas', imagenes: null, estatus: 'DISPONIBLE' },
-      { id: 2, nombre: 'Girasol', precio: 15, categoria: 'San valentin', imagenes: null, estatus: 'POCOS' },
-      { id: 3, nombre: 'Setosa', precio: 189, categoria: 'Año nuevo', imagenes: null, estatus: 'AGOTADO' },
-      { id: 4, nombre: 'Tulipan', precio: 87, categoria: 'Cumpleaños', imagenes: null, estatus: 'DISPONIBLE' },
-    ]
-    setProducts(datos)
-  }, []);
+  //----------------| Interaccion con back-end |----------------
+  //--> GET
+  const obtenerProductos = async () => {
+    console.log("Obteniendo productos...")
+    try {
+      const datos = await axios.get(consultarProductos)
+      // console.log(datos.data.products)
+      setProducts(datos.data.products)
+    } catch (error) { console.log(error) }
+  }
 
-
-  //----------------| Interaccion con dialogos |----------------
-  const abrirDialogoCM = () => {
-    setProduct(florVacia);
-    setSubmitted(false);
-    setProductDialog(true);
-  };
-
-  const cerrarDialogoCM = () => {
-    setSubmitted(false);
-    setProductDialog(false);
-  };
-
-  const cerrarDialogoEliminarRegistro = () => { setDeleteProductDialog(false) };
-
-  const cerrarDialogoEliminarRegistros = () => { setDeleteProductsDialog(false) }
-
-  //----------------| Funciones Back-end |----------------
-  const guardarRegistro = () => {
-    //--> Validacion antes de envio
-    if (Object.values(product).includes('')) {
+  //--> POST
+  const crearProducto = async (productoNuevo) => {
+    console.log("Creando producto...")
+    //--> Validar envio
+    if (Object.values(productoNuevo).includes('')) {
       setMensajeRespuesta(camposVacios)
       setTimeout(() => { setMensajeRespuesta('') }, 3000)
       return
     }
 
-    setSubmitted(true);
+    //--> Preparar envio back-end
+    const token = localStorage.getItem('token')
+    const cabecera = {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    }
+    try {
+      const respuesta = await axios.post("http://localhost:27017/api/productos", productoNuevo, cabecera)
+      setTimeout(() => {
+        obtenerProductos()
+        toast.current.show({
+          severity: 'success', summary: `${respuesta.data.msg}`, life: 3000
+        });
+      }, 6000);
+
+      cerrarDialogoCM()
+      setProduct(productoVacio)
+    } catch (error) {
+      console.log(error.response.data)
+      setMensajeRespuesta(error.response.data)
+      setTimeout(() => { setMensajeRespuesta('') }, 3000);
+    }
+  }
+
+  //--> PUT
+  const actualizarProducto = async (productoEditar) => {
+    console.log("Actualizando...")
+
+    //--> Validar antes de enviar
+    if (Object.values(productoEditar).includes('') || nombreNuevo === '') {
+      setMensajeRespuesta(camposVacios)
+      setTimeout(() => { setMensajeRespuesta('') }, 3000);
+      return
+    }
+
+    //--> Preparar objeto para enviar
+    const token = localStorage.getItem('token')
+    const cabecera = {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    }
+    const objetoEnviar = {
+      nombreProducto: product.nombreProducto,
+      nuevoNombre: nombreNuevo,
+      descrProducto: product.descrProducto,
+      tipoProducto: product.tipoProducto,
+      precioProducto: product.precioProducto,
+      cantidadInv: product.cantidadInv,
+      categoriaProducto: product.categoriaProducto,
+      imagenesAdd: [],
+      imagenesRem: []
+    }
+    //--> Mandar objeto al back-end
+    try {
+      const respuesta = await axios.post(editarProducto, objetoEnviar, cabecera)
+      toast.current.show({
+        severity: 'success', summary: `${respuesta.data.msg}`, life: 3000
+      });
+      cerrarDialogoCM()
+
+      //--> Limpieza
+      setProduct(productoVacio)
+      setNombreNuevo('')
+
+      //--> Renderizar despues de enviar
+      obtenerProductos()
+    } catch (error) {
+      console.log(error.response.data)
+      setMensajeRespuesta(error.response.data)
+      setTimeout(() => { setMensajeRespuesta('') }, 3000);
+    }
+  }
+
+  //--> DELETE
+  const quitarProducto = async () => {
+    console.log("Eliminando producto...")
+    console.log(product)
+    //--> Crear objeto a eliminar
+    const objetoEliminar = { nombreProducto: product.nombreProducto }
+    const token = localStorage.getItem('token')
+    const cabecera = {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    }
+    //--> Mandar objeto a back-end
+    try {
+      const respuesta = await axios.post(eliminarProducto, objetoEliminar, cabecera)
+      console.log(respuesta.data.msg)
+      toast.current.show({
+        severity: 'success', summary: `${respuesta.data.msg}`, life: 3000
+      });
+
+      //--> Leer productos otra vez
+      obtenerProductos()
+      //--> Cerrar dialogo
+      cerrarDialogoEliminarRegistro()
+    } catch (error) {
+      console.log(error.response.data)
+      setMensajeRespuesta(error.response.data)
+      setTimeout(() => { setMensajeRespuesta('') }, 3000);
+    }
+  }
+
+  //----------------| Renderizado |----------------
+  //--> Cargar cuando se renderiza
+  useEffect(() => { obtenerProductos() }, []);
+
+  //--> Revisar si es editar o crear producto
+  useEffect(() => {
+    if (product._id) setEditar(true)
+    else setEditar(false)
+  }, [product])
+
+  //----------------| Interaccion con dialogos |----------------
+  const abrirDialogoCM = () => {
+    setProduct(productoVacio);
+    setNombreNuevo('')
+    setProductDialog(true);
+  };
+
+  const cerrarDialogoCM = () => { setProductDialog(false) };
+
+  const cerrarDialogoEliminarRegistro = () => { setDeleteProductDialog(false) };
+
+  const cerrarDialogoEliminarRegistros = () => { setDeleteProductsDialog(false) }
+
+  //----------------| Funcion CRUD |----------------
+  const guardarRegistro = async () => {
     //--> Editar registro
-    if (product.id) {
-      const arregloModificado = products.map((regis) => regis.id === product.id ? product : regis)
-      setProducts(arregloModificado)
-      toast.current.show({ severity: 'success', summary: 'Flor actualizada', detail: 'Se ha actualizado la flor', life: 3000 });
-    }
+    if (product._id) { actualizarProducto(product) }
+
     //--> Crear registro
-    else {
-      const arregloNuevo = [...products, product]
-      setProducts(arregloNuevo)
-      toast.current.show({ severity: 'success', summary: 'Flor creada', detail: 'La flor ha sido creada', life: 3000 });
-    }
-    setProduct(florVacia);
-    setProductDialog(false);
+    else { crearProducto(product) }
   };
 
   const editarRegistro = (product) => {
@@ -107,31 +219,36 @@ const CatalogoFlores = () => {
     setDeleteProductDialog(true);
   };
 
-  const eliminarRegistro = () => {
-    //--> Registros que no sean los seleccionados
-    let _products = products.filter((val) => val.id !== product.id);
-
-    setProducts(_products);
-    setDeleteProductDialog(false);
-    setProduct(florVacia);
-    toast.current.show({
-      severity: 'success', summary: 'Flor eliminada', detail: 'Se ha eliminado correctamente la flor', life: 3000
-    });
-  };
-
   const exportCSV = () => { dt.current.exportCSV() }
 
   const confirmDeleteSelected = () => { setDeleteProductsDialog(true) }
 
+  //--> DELETE
   const deleteSelectedProducts = () => {
-    //--> Registros que no son seleccionados
-    let _products = products.filter((val) => !selectedProducts.includes(val));
-
-    setProducts(_products);
-    setDeleteProductsDialog(false);
-    setSelectedProducts(null);
+    //--> Preparar objeto para mandar al back-end
+    const token = localStorage.getItem('token')
+    const cabecera = {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    }
+    //--> Listar los productos eliminados
+    selectedProducts.map(async registro => {
+      try {
+        const respuesta = await axios.post(eliminarProducto, { nombreProducto: registro.nombreProducto }, cabecera)
+        console.log(respuesta.data.msg)
+      } catch (error) {
+        console.log(error.response.data)
+      }
+      finally {
+        //--> Leer registros de back-end
+        obtenerProductos()
+        setDeleteProductsDialog(false);
+        setSelectedProducts(null);
+      }
+    })
     toast.current.show({
-      severity: 'success', summary: 'Flores eliminadas', detail: 'Las flores fueron eliminadas', life: 3000
+      severity: 'success', summary: 'Productos eliminados', detail: 'Los productos fueron eliminados', life: 3000
     });
   };
 
@@ -164,21 +281,24 @@ const CatalogoFlores = () => {
       alt={rowData.image} className="shadow-2 border-round" style={{ width: '64px' }} />;
   };
 
-  const plantillaPrecio = (rowData) => { return formatoPrecio(rowData.precio) }
+  const plantillaPrecio = (rowData) => { return formatoPrecio(rowData.precioProducto) }
+  const plantillaDescuentoPrecio = (rowData) => { return formatoPrecio(rowData.precioDescuento) }
+  const plantillaPorcentaje = (rowData) => { return `${rowData.descuentoProducto} %` }
+  const plantillaCantiddad = (rowData) => { return `${rowData.cantidadInv} piezas` }
 
   const ratingBodyTemplate = (rowData) => {
     return <Rating value={rowData.rating} readOnly cancel={false} />;
   };
 
   const plantillaEstatus = (rowData) => {
-    return <Tag value={rowData.estatus} severity={getSeverity(rowData)}></Tag>;
+    return <Tag value={rowData.statusProducto} severity={getSeverity(rowData)}></Tag>;
   };
 
   const getSeverity = (product) => {
-    switch (product.estatus) {
-      case 'DISPONIBLE': return 'success';
-      case 'POCOS': return 'warning';
-      case 'AGOTADO': return 'danger';
+    switch (product.statusProducto) {
+      case 'Disponible': return 'success';
+      case 'Pocos': return 'warning';
+      case 'Agotado': return 'danger';
       default: return null;
     }
   };
@@ -186,7 +306,7 @@ const CatalogoFlores = () => {
   //----------------| Botones de dialogos |----------------
   const cabezal = (
     <div className="flex flex-wrap gap-2 align-items-center justify-content-between">
-      <h4 className="m-0">Control de flores</h4>
+      <h4 className="m-0">Control de productos</h4>
       <span className="p-input-icon-left">
         <i className="pi pi-search" />
         <InputText type="search" onInput={(e) => setGlobalFilter(e.target.value)} placeholder="Buscar..." />
@@ -197,14 +317,14 @@ const CatalogoFlores = () => {
   const botonIzquierda = () => {
     return (
       <div className="flex flex-wrap gap-2">
-        <Button label="New" icon="pi pi-plus" severity="success" onClick={abrirDialogoCM} />
-        <Button label="Delete" icon="pi pi-trash" severity="danger" onClick={confirmDeleteSelected} disabled={!selectedProducts || !selectedProducts.length} />
+        <Button label="Nuevo" icon="pi pi-plus" severity="success" onClick={abrirDialogoCM} />
+        <Button label="Eliminar" icon="pi pi-trash" severity="danger" onClick={confirmDeleteSelected} disabled={!selectedProducts || !selectedProducts.length} />
       </div>
     );
   };
 
   const botonDerecha = () => {
-    return <Button label="Export" icon="pi pi-upload" className="p-button-help" onClick={exportCSV} />;
+    return <Button label="Exportar" icon="pi pi-upload" className="p-button-help" onClick={exportCSV} />;
   };
 
   const botonesAccion = (rowData) => {
@@ -226,7 +346,7 @@ const CatalogoFlores = () => {
   const botonesEliminarRegistro = (
     <>
       <Button label="No" icon="pi pi-times" outlined onClick={cerrarDialogoEliminarRegistro} />
-      <Button label="Si" icon="pi pi-check" severity="danger" onClick={eliminarRegistro} />
+      <Button label="Si" icon="pi pi-check" severity="danger" onClick={quitarProducto} />
     </>
   );
 
@@ -257,20 +377,33 @@ const CatalogoFlores = () => {
               globalFilter={globalFilter} header={cabezal}
             >
               <Column selectionMode="multiple" exportable={false} />
-              <Column field="id" header="ID" sortable style={{ minWidth: '12rem', textAlign: "center" }} />
-              <Column field="nombre" header="Nombre" sortable style={{ minWidth: '16rem', textAlign: "center" }} />
+              <Column field="nombreProducto" header="Nombre" sortable style={{ minWidth: '12rem', textAlign: "center" }} />
+              <Column field="descrProducto" header="Descripción" sortable style={{ minWidth: '12rem', textAlign: "center" }} />
+              <Column field="tipoProducto" header="Tipo" sortable style={{ minWidth: '12rem', textAlign: "center" }} />
+              <Column field="precioProducto" header="Precio" body={plantillaPrecio}
+                sortable style={{ minWidth: '12rem', textAlign: "center" }} />
+              <Column field="cantidadInv" header="Cantidad" sortable body={plantillaCantiddad}
+                style={{ minWidth: '12rem', textAlign: "center" }} />
+              <Column field="categoriaProducto" header="Categoria" sortable style={{ minWidth: '12rem', textAlign: "center" }} />
+              <Column field="descuentoProducto" header="Descuento" sortable body={plantillaPorcentaje}
+                style={{ minWidth: '12rem', textAlign: "center" }} />
+              <Column field="precioDescuento" header="Precio de descuento" sortable body={plantillaDescuentoPrecio}
+                style={{ minWidth: '12rem', textAlign: "center" }} />
+              <Column field="statusProducto" header="Estatus" sortable body={plantillaEstatus}
+                style={{ minWidth: '12rem', textAlign: "center" }} />
+
+              {/* <Column field="nombre" header="Nombre" sortable style={{ minWidth: '16rem', textAlign: "center" }} />
               <Column field="precio" header="Precio" body={plantillaPrecio} sortable
                 style={{ minWidth: '8rem', textAlign: "center" }} />
               <Column field="categoria" header="Categoria" sortable style={{ minWidth: '10rem', textAlign: "center" }} />
-              {/* <Column field="rating" header="Reviews" body={ratingBodyTemplate} sortable style={{ minWidth: '12rem' }}></Column> */}
               <Column field="image" header="Imagenes" body={plantillaImagen} />
               <Column field="estatus" header="Estatus" body={plantillaEstatus} sortable
-                style={{ minWidth: '12rem', textAlign: "center" }} />
+                style={{ minWidth: '12rem', textAlign: "center" }} /> */}
               <Column header="Editar" body={botonesAccion} exportable={false} style={{ minWidth: '12rem' }} />
             </DataTable>
 
             <Dialog
-              visible={productDialog} style={{ width: '32rem' }} breakpoints={{ '960px': '75vw', '641px': '90vw' }} header="Detalles de flor" modal className="p-fluid" footer={botonesCrearModificar} onHide={cerrarDialogoCM}
+              visible={productDialog} style={{ width: '32rem' }} breakpoints={{ '960px': '75vw', '641px': '90vw' }} header="Detalles del producto" modal className="p-fluid" footer={botonesCrearModificar} onHide={cerrarDialogoCM}
             >
               {product.image && (
                 <img
@@ -280,52 +413,80 @@ const CatalogoFlores = () => {
               <div className="field">
                 <label htmlFor="nombre" className="font-bold">Nombre</label>
                 <InputText
-                  id="nombre" value={product.nombre} onChange={(e) => cambiarString(e, 'nombre')}
-                  required autoFocus className={classNames({ 'p-invalid': submitted && !product.name })}
+                  id="nombre" value={product.nombreProducto} onChange={(e) => cambiarString(e, 'nombreProducto')}
+                  required autoFocus className={classNames({ 'p-invalid': submitted && !product.nombreProducto })}
                 />
-                {submitted && !product.nombre && <small className="p-error">El nombre es obligatorio.</small>}
+                {/* {submitted && !product.nombre && <small className="p-error">El nombre es obligatorio.</small>} */}
+              </div>
+              {editar && (
+                <div className="field">
+                  <label htmlFor="nombre" className="font-bold">Nuevo nombre</label>
+                  <InputText
+                    id="nombre" value={nombreNuevo} onChange={(e) => setNombreNuevo(e.target.value)}
+                    required autoFocus className={classNames({ 'p-invalid': submitted && !product.nombreProducto })}
+                  />
+                  {/* {submitted && !product.nombre && <small className="p-error">El nombre es obligatorio.</small>} */}
+                </div>
+              )}
+              <div className="field">
+                <label htmlFor="descripcion" className="font-bold">Descripción</label>
+                <InputText
+                  id="nombre" value={product.descrProducto} onChange={(e) => cambiarString(e, 'descrProducto')}
+                  required autoFocus className={classNames({ 'p-invalid': submitted && !product.descrProducto })}
+                />
               </div>
               <div className="formgrid grid">
                 <div className="field col">
                   <label htmlFor="precio" className="font-bold">Precio</label>
                   <InputNumber
-                    id="precio" value={product.precio} onValueChange={(e) => cambiarNumero(e, 'precio')}
+                    id="precio" value={product.precioProducto} onValueChange={(e) => cambiarNumero(e, 'precioProducto')}
                     mode="currency" currency="USD" locale="en-US"
                   />
                 </div>
                 <div className="field col">
-                  <label htmlFor="categoria" className="font-bold">Categoria/Evento</label>
+                  <label className="font-bold">Tipo de producto</label>
                   <Dropdown
-                    value={product.categoria} onChange={(e) => cambiarString(e, 'categoria')}
-                    options={listaCategorias} optionLabel="nombre" optionValue="valor"
+                    value={product.tipoProducto} onChange={(e) => cambiarString(e, 'tipoProducto')}
+                    options={listaTipos} optionLabel="nombre" optionValue="valor"
                     placeholder="Escoge una categoria" className="w-full md:w-14rem" />
                 </div>
               </div>
 
-              <div className="field">
-                <label className="mb-3 font-bold">Estatus</label>
-                <div className="formgrid grid">
-                  <div className="field-radiobutton col-4">
-                    <RadioButton
-                      inputId="estatus1" name="estatus" value="DISPONIBLE" onChange={cambiarEstatus}
-                      checked={product.estatus === 'DISPONIBLE'} />
-                    <label htmlFor="estatus1">Disponible</label>
-                  </div>
-                  <div className="field-radiobutton col-4">
-                    <RadioButton
-                      inputId="estatus2" name="estatus" value="POCOS" onChange={cambiarEstatus}
-                      checked={product.estatus === 'POCOS'} />
-                    <label htmlFor="estatus2">Pocos</label>
-                  </div>
-                  <div className="field-radiobutton col-4">
-                    <RadioButton
-                      inputId="estatus3" name="estatus" value="AGOTADO" onChange={cambiarEstatus}
-                      checked={product.estatus === 'AGOTADO'} />
-                    <label htmlFor="estatus3">Agotado</label>
-                  </div>
+              <div className="formgrid grid">
+                <div className="field col">
+                  <label htmlFor="cantidad" className="font-bold">Cantidad</label>
+                  <InputNumber
+                    id="cantidad" value={product.cantidadInv} onValueChange={(e) => cambiarNumero(e, 'cantidadInv')}
+                    suffix=" piezas"
+                  />
+                </div>
+                <div className="field col">
+                  <label htmlFor="descuento" className="font-bold">Descuento</label>
+                  <InputNumber
+                    id="descuento" value={product.descuentoProducto} onValueChange={(e) => cambiarNumero(e, 'descuentoProducto')}
+                    suffix=" %"
+                  />
                 </div>
               </div>
-              <FileUpload mode="basic" name="demo[]" url="/api/upload" accept="image/*" maxFileSize={1000000} />
+              <div className="field">
+                <label htmlFor="categoria" className="font-bold">Categoria</label>
+                <InputText
+                  id="categoria" value={product.categoriaProducto} onChange={(e) => cambiarString(e, 'categoriaProducto')}
+                  required autoFocus className={classNames({ 'p-invalid': submitted && !product.categoriaProducto })}
+                />
+              </div>
+
+              <div className="flex justify-content-around">
+                <FileUpload
+                  mode="basic" name="demo[]" url="/api/upload" accept="image/*" maxFileSize={1000000} chooseLabel="Foto 1"
+                />
+                <FileUpload
+                  mode="basic" name="demo[]" url="/api/upload" accept="image/*" maxFileSize={1000000} chooseLabel="Foto 2"
+                />
+                <FileUpload
+                  mode="basic" name="demo[]" url="/api/upload" accept="image/*" maxFileSize={1000000} chooseLabel="Foto 3"
+                />
+              </div>
               {/* <FileUpload mode="basic" accept="image/*" maxFileSize={1000000}
                 auto chooseLabel="Browse" /> */}
               {mensajeRespuesta && (
@@ -345,7 +506,7 @@ const CatalogoFlores = () => {
                 <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: '2rem' }} />
                 {product && (
                   <span>
-                    Estas seguro de eliminar <b>{product.nombre}</b>?
+                    Estas seguro de eliminar <b>{product.nombreProducto}</b>?
                   </span>
                 )}
               </div>

@@ -1,8 +1,14 @@
 export let objetoVacio = {
-  id: null,
-  nombre: '',
-  precio: 0,
-  categoria: '',
-  imagenes: null,
-  estatus: 'DISPONIBLE'
-};
+  nombreProducto: "",
+  descrProducto: "",
+  tipoProducto: "",
+  precioProducto: 0,
+  categoriaProducto: '',
+  cantidadInv: 0,
+  descuentoProducto: 0,
+  imagenes: [
+    "C:/Users/uriel/OneDrive/Escritorio/Uriel/Whoami/Multimedia/Imagenes/cubo.jpg",
+    "C:/Users/uriel/OneDrive/Escritorio/Uriel/Whoami/Multimedia/Imagenes/cubo.jpg",
+    "C:/Users/uriel/OneDrive/Escritorio/Uriel/Whoami/Multimedia/Imagenes/cubo.jpg"
+  ]
+}
