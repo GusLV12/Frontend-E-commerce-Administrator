@@ -99,7 +99,12 @@ const CrearCuenta = () => {
     }
 
     try {
-      const objetoCrearUsuario = { nombreAdministrador: nombre, emailAdministrador: email, passwordAdministrador: password }
+      const objetoCrearUsuario = {
+        nombreAdministrador: nombre,
+        apellidoAdministrador: apellidos,
+        emailAdministrador: email,
+        passwordAdministrador: password
+      }
       const respuesta = await axios.post(nuevoUsuario, objetoCrearUsuario)
       //--> Limpiar campos
       setEmail('')
