@@ -43,6 +43,8 @@ export const contactoInvalido = 'Formato de contacto incorrecto.'
 export const precioInvalido = 'Formato de precio inválido.'
 export const direccionInvalido = 'Campos de dirección inválidos.'
 export const nombreInvalido = 'Formato del nombre inválido.'
+export const descripcionInvalida = 'Formato de la descripción inválida.'
+export const descuendoInvalido = 'Número de descuento invalido.'
 
 //--> Validando
 export const validandoPedido = 'Validando pedido.'

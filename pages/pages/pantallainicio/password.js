@@ -8,8 +8,8 @@ import { Button } from 'primereact/button';
 import { Messages } from 'primereact/messages';
 import { InputText } from "primereact/inputtext";
 //--> Componentes propios
-import { campoVacio, emailInvalido } from '@/components/mensajesNotificaciones/mensajes';
-import { restablecerPass } from '@/components/mensajesNotificaciones/notificaciones';
+import { campoVacio, emailInvalido } from '@/helpers/constantes/mensajes';
+import { restablecerPass } from '@/helpers/constantes/notificaciones';
 
 const RestablecerPassword = () => {
   //--> Mensajes y notificaciones

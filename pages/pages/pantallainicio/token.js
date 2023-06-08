@@ -9,8 +9,8 @@ import { InputText } from "primereact/inputtext";
 import { useRouter } from 'next/router';
 //--> Componentes propios
 import { temporizador } from '@/helpers/funciones';
-import { campoVacio, longiudTokenInvalida, tokenExpirado, exitoToken } from '@/components/mensajesNotificaciones/mensajes';
-import { validarToken } from '@/components/mensajesNotificaciones/links';
+import { campoVacio, longiudTokenInvalida, tokenExpirado, exitoToken } from '@/helpers/constantes/mensajes';
+import { validarToken } from '@/helpers/constantes/links';
 
 const Token = () => {
   //--> Variable de redireccinamiento

@@ -17,8 +17,8 @@ import back from '../../../public/images/background.gif';
 //--> Componentes propios
 import {
   camposVacios, emailInvalido, exitoCuenta, passwordInvalido, passwordsInValidas
-} from '@/components/mensajesNotificaciones/mensajes';
-import { nuevoUsuario } from '@/components/mensajesNotificaciones/links';
+} from '@/helpers/constantes/mensajes';
+import { nuevoUsuario } from '@/helpers/constantes/links';
 
 
 const CrearCuenta = () => {
@@ -29,12 +29,12 @@ const CrearCuenta = () => {
   //--> Campos de entrada
   const [email, setEmail] = useState('')
   const [nombre, setNombre] = useState('')
-  const [apellidos,setApellidos ] = useState ('')
+  const [apellidos, setApellidos] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   //--> Validar envio
   const [estiloEmail, setEstiloEmail] = useState('')
-  const [estiloApellido, setEstiloApellidos] = useState ('')
+  const [estiloApellido, setEstiloApellidos] = useState('')
   const [estiloNombre, setEstiloNombre] = useState('')
   const [estiloPassword, setEstiloPassword] = useState('')
   const [estiloConfirmPass, setEstiloConfirmPass] = useState('')

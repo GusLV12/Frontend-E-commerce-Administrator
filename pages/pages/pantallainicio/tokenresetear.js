@@ -13,8 +13,9 @@ import { useRouter } from 'next/router';
 import { temporizador } from '@/helpers/funciones';
 import {
   campoVacio, longiudTokenInvalida, tokenExpirado, exitoToken, exitoResetPassword, passwordsInValidas, passwordInvalido
-} from '@/components/mensajesNotificaciones/mensajes';
-import { cambiarPassword, tokenResetearPassword } from '@/components/mensajesNotificaciones/links';
+} from '@/helpers/constantes/mensajes';
+
+import { cambiarPassword, tokenResetearPassword } from '@/helpers/constantes/links';
 
 const TokenResetear = () => {
   //--> Variable de redireccinamiento
@@ -176,7 +177,7 @@ const TokenResetear = () => {
           <div className="card ">
 
             <p className='text-center text-6xl font-bold'>Restablecer contraseña</p>
-            <p className='text-xl text-center'>Ingrese su token para resetear su contraseña</p> <br/>
+            <p className='text-xl text-center'>Ingrese su token para resetear su contraseña</p> <br />
             <p className='text-center'>
               Para finalizar el proceso ingrese el token que recibió en su correo.
             </p>

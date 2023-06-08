@@ -16,10 +16,10 @@ import myImage from '../imagenes/login/loto.jpg';
 import myImage1 from '../imagenes/login/flower1.jpeg';
 import loto from '../imagenes/login/principal1.png';
 import styles from '../styles/styles.module.css';
-import { iniciarSesion, resetearPassword } from '@/components/mensajesNotificaciones/links';
+import { iniciarSesion, resetearPassword } from '@/helpers/constantes/links';
 import {
   campoVacio, camposVacios, emailInvalido, passwordInvalido, resetearExitoso
-} from '@/components/mensajesNotificaciones/mensajes';
+} from '@/helpers/constantes/mensajes';
 
 
 

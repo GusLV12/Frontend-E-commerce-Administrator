@@ -1,11 +1,8 @@
 import React from 'react';
 import AppMenuitem from './AppMenuitem';
-// import { LayoutContext } from './context/layoutcontext';
 import { MenuProvider } from './context/menucontext';
-// import Link from 'next/link';
 
 const AppMenu = () => {
-  // const { layoutConfig } = useContext(LayoutContext);
 
   const model = [
     {
@@ -15,9 +12,9 @@ const AppMenu = () => {
     {
       label: 'Modificación de Datos',
       items: [
-        { label: 'Productos', icon: 'pi pi-fw pi-database', to: '/pages/catalogos/flores' },
-         { label: 'Temporadas', icon: 'pi pi-fw pi-id-card' },
-        
+        { label: 'Productos', icon: 'pi pi-fw pi-database', to: '/pages/catalogos/productos' },
+        { label: 'Temporadas', icon: 'pi pi-fw pi-database' },
+
       ]
     },
     {

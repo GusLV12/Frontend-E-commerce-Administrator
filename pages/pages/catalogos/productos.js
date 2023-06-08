@@ -18,16 +18,17 @@ import { Message } from 'primereact/message';
 //--> Funciones propias
 import { objetoVacio } from "@/components/catalogos/objetovacio";
 import { formatoPrecio } from "@/helpers/funciones";
-import { camposVacios } from "@/components/mensajesNotificaciones/mensajes";
+import { camposVacios, descripcionInvalida, descuendoInvalido, nombreInvalido } from "@/helpers/constantes/mensajes";
 import { listaTipos } from "@/components/catalogos/listas";
-import { consultarProductos, crearProducto, editarProducto, eliminarProducto } from "@/components/mensajesNotificaciones/links";
+import { consultarProductos, editarProducto, eliminarProducto } from "@/helpers/constantes/links";
+import { alfaNumericoEspacios, descuento } from "@/helpers/constantes/expresionesregulares";
 
-const CatalogoFlores = () => {
-  // Token generado desde el login
-  let valorToken
-
-  //--> Estructura de objeto vacio
+const CatalogoProductos = () => {
+  // --> Estructura de objeto vacio
   let productoVacio = objetoVacio
+  // --> Validar cualquier string 
+  const validarString = alfaNumericoEspacios
+  const validarDescuento = descuento
 
   //----------------| Lista de variables |----------------
   //--> Registros
@@ -39,6 +40,13 @@ const CatalogoFlores = () => {
   const [productDialog, setProductDialog] = useState(false);
   const [deleteProductDialog, setDeleteProductDialog] = useState(false);
   const [deleteProductsDialog, setDeleteProductsDialog] = useState(false);
+  //--> Estilos
+  const [estiloNombre, setEstiloNombre] = useState('')
+  const [estiloDescripcion, setEstiloDescripcion] = useState('')
+  const [estiloTP, setEstiloTP] = useState('')
+  const [estiloDescuento, setEstiloDescuento] = useState('')
+  const [estiloCategoria, setEstiloCategoria] = useState('')
+  // const [estiloNuevoNombre, setEstiloNuevoNombre] = useState('')
   //--> Otros
   const [editar, setEditar] = useState(false)
   const [selectedProducts, setSelectedProducts] = useState(null);
@@ -64,11 +72,50 @@ const CatalogoFlores = () => {
   //--> POST
   const crearProducto = async (productoNuevo) => {
     console.log("Creando producto...")
-    //--> Validar envio
+    //--> Validar campos llenos
     if (Object.values(productoNuevo).includes('')) {
+      if (!productoNuevo.nombreProducto) setEstiloNombre('p-invalid')
+      if (!productoNuevo.descrProducto) setEstiloDescripcion('p-invalid')
+      if (!productoNuevo.tipoProducto) setEstiloTP('p-invalid')
+      if (!productoNuevo.categoriaProducto) setEstiloCategoria('p-invalid')
       setMensajeRespuesta(camposVacios)
       setTimeout(() => { setMensajeRespuesta('') }, 3000)
       return
+    } else {
+      setEstiloNombre('')
+      setEstiloDescripcion('')
+      setEstiloTP('')
+      setEstiloCategoria('')
+    }
+    //--> Validar Nombre
+    if (!validarString.test(productoNuevo.nombreProducto)) {
+      setEstiloNombre('p-invalid')
+      setMensajeRespuesta(nombreInvalido)
+      setTimeout(() => { setMensajeRespuesta('') }, 3000)
+      return
+    } else {
+      setEstiloNombre('')
+      setMensajeRespuesta('')
+    }
+    //--> Validar descripción
+    if (!validarString.test(productoNuevo.descrProducto)) {
+      setEstiloDescripcion('p-invalid')
+      setMensajeRespuesta(descripcionInvalida)
+      setTimeout(() => { setMensajeRespuesta('') }, 3000)
+      return
+    } else {
+      setEstiloDescripcion('')
+      setMensajeRespuesta('')
+    }
+    //--> Validar descuento
+    if (!validarDescuento.test(productoNuevo.descuentoProducto)) {
+      setEstiloDescuento('p-invalid')
+      setMensajeRespuesta(descuendoInvalido)
+      setTimeout(() => { setMensajeRespuesta('') }, 3000)
+      return
+    } else {
+      setEstiloDescuento('')
+      setMensajeRespuesta('')
     }
 
     //--> Preparar envio back-end
@@ -99,12 +146,50 @@ const CatalogoFlores = () => {
   //--> PUT
   const actualizarProducto = async (productoEditar) => {
     console.log("Actualizando...")
-
-    //--> Validar antes de enviar
+    //--> Validar campos llenos
     if (Object.values(productoEditar).includes('') || nombreNuevo === '') {
+      if (!productoEditar.nombreProducto) setEstiloNombre('p-invalid')
+      if (!productoEditar.descrProducto) setEstiloDescripcion('p-invalid')
+      if (!productoEditar.tipoProducto) setEstiloTP('p-invalid')
+      if (!productoEditar.categoriaProducto) setEstiloCategoria('p-invalid')
       setMensajeRespuesta(camposVacios)
-      setTimeout(() => { setMensajeRespuesta('') }, 3000);
+      setTimeout(() => { setMensajeRespuesta('') }, 3000)
       return
+    } else {
+      setEstiloNombre('')
+      setEstiloDescripcion('')
+      setEstiloTP('')
+      setEstiloCategoria('')
+    }
+    //--> Validar Nombre
+    if (!validarString.test(productoEditar.nombreProducto)) {
+      setEstiloNombre('p-invalid')
+      setMensajeRespuesta(nombreInvalido)
+      setTimeout(() => { setMensajeRespuesta('') }, 3000)
+      return
+    } else {
+      setEstiloNombre('')
+      setMensajeRespuesta('')
+    }
+    //--> Validar descripción
+    if (!validarString.test(productoEditar.descrProducto)) {
+      setEstiloDescripcion('p-invalid')
+      setMensajeRespuesta(descripcionInvalida)
+      setTimeout(() => { setMensajeRespuesta('') }, 3000)
+      return
+    } else {
+      setEstiloDescripcion('')
+      setMensajeRespuesta('')
+    }
+    //--> Validar descuento
+    if (!validarDescuento.test(productoEditar.descuentoProducto)) {
+      setEstiloDescuento('p-invalid')
+      setMensajeRespuesta(descuendoInvalido)
+      setTimeout(() => { setMensajeRespuesta('') }, 3000)
+      return
+    } else {
+      setEstiloDescuento('')
+      setMensajeRespuesta('')
     }
 
     //--> Preparar objeto para enviar
@@ -192,6 +277,12 @@ const CatalogoFlores = () => {
     setProduct(productoVacio);
     setNombreNuevo('')
     setProductDialog(true);
+    //--> Estilos
+    setEstiloNombre('')
+    setEstiloDescripcion('')
+    setEstiloDescuento('')
+    setEstiloCategoria('')
+    setEstiloTP('')
   };
 
   const cerrarDialogoCM = () => { setProductDialog(false) };
@@ -331,32 +422,32 @@ const CatalogoFlores = () => {
     return (
       <>
         <Button icon="pi pi-pencil" rounded severity="warning" className="mr-2" onClick={() => editarRegistro(rowData)} />
-        <Button icon="pi pi-trash" rounded  severity="danger" onClick={() => confirmarEliminarRegistro(rowData)} />
+        <Button icon="pi pi-trash" rounded severity="danger" onClick={() => confirmarEliminarRegistro(rowData)} />
       </>
     );
   };
 
   const botonesCrearModificar = (
-    <> 
-      <Button label="Guardar"  severity="success" icon="pi pi-check" onClick={guardarRegistro} />
+    <>
+      <Button label="Guardar" severity="success" icon="pi pi-check" onClick={guardarRegistro} />
       <Button label="Cancelar" security="danger" icon="pi pi-times" outlined onClick={cerrarDialogoCM} />
-     
+
     </>
   );
 
   const botonesEliminarRegistro = (
     <>
-    <Button label="Sí" icon="pi pi-check" severity="success" onClick={quitarProducto} />
+      <Button label="Sí" icon="pi pi-check" severity="success" onClick={quitarProducto} />
       <Button label="No" icon="pi pi-times" severity="danger" onClick={cerrarDialogoEliminarRegistro} />
-      
+
     </>
   );
 
   const botonesEliminarRegistros = (
-    <> 
+    <>
       <Button label="Sí" icon="pi pi-check" severity="success" onClick={deleteSelectedProducts} />
       <Button label="No" icon="pi pi-times" severity="danger" onClick={cerrarDialogoEliminarRegistros} />
-     
+
     </>
   );
 
@@ -394,14 +485,6 @@ const CatalogoFlores = () => {
                 style={{ minWidth: '12rem', textAlign: "center" }} />
               <Column field="statusProducto" header="Estatus" sortable body={plantillaEstatus}
                 style={{ minWidth: '12rem', textAlign: "center" }} />
-
-              {/* <Column field="nombre" header="Nombre" sortable style={{ minWidth: '16rem', textAlign: "center" }} />
-              <Column field="precio" header="Precio" body={plantillaPrecio} sortable
-                style={{ minWidth: '8rem', textAlign: "center" }} />
-              <Column field="categoria" header="Categoria" sortable style={{ minWidth: '10rem', textAlign: "center" }} />
-              <Column field="image" header="Imagenes" body={plantillaImagen} />
-              <Column field="estatus" header="Estatus" body={plantillaEstatus} sortable
-                style={{ minWidth: '12rem', textAlign: "center" }} /> */}
               <Column header="Editar" body={botonesAccion} exportable={false} style={{ minWidth: '12rem' }} />
             </DataTable>
 
@@ -417,9 +500,8 @@ const CatalogoFlores = () => {
                 <label htmlFor="nombre" className="font-bold">Nombre</label>
                 <InputText
                   id="nombre" value={product.nombreProducto} onChange={(e) => cambiarString(e, 'nombreProducto')}
-                  required autoFocus className={classNames({ 'p-invalid': submitted && !product.nombreProducto })}
+                  required autoFocus className={estiloNombre}
                 />
-                {/* {submitted && !product.nombre && <small className="p-error">El nombre es obligatorio.</small>} */}
               </div>
               {editar && (
                 <div className="field">
@@ -428,14 +510,13 @@ const CatalogoFlores = () => {
                     id="nombre" value={nombreNuevo} onChange={(e) => setNombreNuevo(e.target.value)}
                     required autoFocus className={classNames({ 'p-invalid': submitted && !product.nombreProducto })}
                   />
-                  {/* {submitted && !product.nombre && <small className="p-error">El nombre es obligatorio.</small>} */}
                 </div>
               )}
               <div className="field">
                 <label htmlFor="descripcion" className="font-bold">Descripción</label>
                 <InputText
                   id="nombre" value={product.descrProducto} onChange={(e) => cambiarString(e, 'descrProducto')}
-                  required autoFocus className={classNames({ 'p-invalid': submitted && !product.descrProducto })}
+                  required autoFocus className={estiloDescripcion}
                 />
               </div>
               <div className="formgrid grid">
@@ -443,7 +524,7 @@ const CatalogoFlores = () => {
                   <label htmlFor="precio" className="font-bold">Precio</label>
                   <InputNumber
                     id="precio" value={product.precioProducto} onValueChange={(e) => cambiarNumero(e, 'precioProducto')}
-                    mode="currency" currency="USD" locale="en-US"
+                    mode="currency" currency="USD" locale="en-US" min={0}
                   />
                 </div>
                 <div className="field col">
@@ -451,7 +532,7 @@ const CatalogoFlores = () => {
                   <Dropdown
                     value={product.tipoProducto} onChange={(e) => cambiarString(e, 'tipoProducto')}
                     options={listaTipos} optionLabel="nombre" optionValue="valor"
-                    placeholder="Elija una categoría" className="w-full md:w-14rem" />
+                    placeholder="Elija una categoría" className={`w-full md:w-14rem ${estiloTP}`} />
                 </div>
               </div>
 
@@ -460,14 +541,14 @@ const CatalogoFlores = () => {
                   <label htmlFor="cantidad" className="font-bold">Cantidad</label>
                   <InputNumber
                     id="cantidad" value={product.cantidadInv} onValueChange={(e) => cambiarNumero(e, 'cantidadInv')}
-                    suffix=" piezas"
+                    suffix=" piezas" min={0}
                   />
                 </div>
                 <div className="field col">
                   <label htmlFor="descuento" className="font-bold">Descuento</label>
                   <InputNumber
                     id="descuento" value={product.descuentoProducto} onValueChange={(e) => cambiarNumero(e, 'descuentoProducto')}
-                    suffix=" %"
+                    suffix=" %" min={0} className={estiloDescuento}
                   />
                 </div>
               </div>
@@ -475,7 +556,7 @@ const CatalogoFlores = () => {
                 <label htmlFor="categoria" className="font-bold">Categoría</label>
                 <InputText
                   id="categoria" value={product.categoriaProducto} onChange={(e) => cambiarString(e, 'categoriaProducto')}
-                  required autoFocus className={classNames({ 'p-invalid': submitted && !product.categoriaProducto })}
+                  required autoFocus className={estiloCategoria}
                 />
               </div>
 
@@ -528,4 +609,4 @@ const CatalogoFlores = () => {
   )
 }
 
-export default CatalogoFlores
+export default CatalogoProductos
