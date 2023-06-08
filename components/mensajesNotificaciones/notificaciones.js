@@ -3,9 +3,9 @@ export const usuarioCreado = { titulo: "¡Usuario creado!", contenido: "Revisa t
 export const cuentaConfirmada = { titulo: "¡Cuenta confirmada!", contenido: "Ya puedes iniciar sesión." }
 export const envioToken = { titulo: "¡Token reenviado!", contenido: "Vuelve a revisar tu correo." }
 export const restablecerPass = {
-  titulo: "¡Revisa tu correo!", contenido: "Hemos enviado un codigo para restablecer tu contraseña."
+  titulo: "Revisa tu correo", contenido: "Hemos enviado un código para restablecer su contraseña."
 }
 export const logueado = { titulo: "Acceso confirmado" }
 
 //-------------------------| Notificaciones de error |-------------------------
-export const errorCrearUsuario = { titulo: "¡Ocurrio un error", contenido: "La cuenta no ha sido creada" }
+export const errorCrearUsuario = { titulo: "¡Ocurrio un error", contenido: "La cuenta no ha sido creada." }

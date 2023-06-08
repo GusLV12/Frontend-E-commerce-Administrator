@@ -133,7 +133,7 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>Administrador</title>
+        <title>Inicio de Sesión</title>
         <meta charSet="UTF-8" />
         <meta name="description" content="Interfaz para administrar la pagina jardin del eden" />
         <meta name="robots" content="index, follow" />
@@ -154,8 +154,8 @@ export default function Home() {
 
 
             <h1 className={`font-bold text-center`}>Recuperar contraseña</h1>
-            <components.Parrafo>Ingresa el correo asociado a tu cuenta</components.Parrafo>
-            <label htmlFor="email1" className="block text-900 ">Email</label>
+            <components.Parrafo>Ingrese el correo asociado a su cuenta</components.Parrafo>
+            <label htmlFor="email1" className="block text-900 ">E-mail</label>
             <InputText
               inputid="email1" value={emailrecuperar} onChange={(e) => setEmailrecuperar(e.target.value)}
               type="text" placeholder="Email address" className={`block text-900  mb-2 w-full p-3  ${estiloEmailRec}`}
@@ -181,7 +181,7 @@ export default function Home() {
             <Image src={loto} className={styles['logo']} alt="Mi imagen" priority={true} />
             <h1 className={`font-bold text-center`}>Iniciar Sesión</h1>
 
-            <label htmlFor="email1" className="block text-900 ">Correo</label>
+            <label htmlFor="email1" className="block text-900 ">Correo electrónico</label>
             <InputText
               inputid="email1" value={email} onChange={(e) => setEmail(e.target.value)}
               type="text" placeholder="Correo electrónico" className={`block text-900  mb-2 w-full p-3  ${estiloEmail}`}

@@ -29,10 +29,12 @@ const CrearCuenta = () => {
   //--> Campos de entrada
   const [email, setEmail] = useState('')
   const [nombre, setNombre] = useState('')
+  const [apellidos,setApellidos ] = useState ('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   //--> Validar envio
   const [estiloEmail, setEstiloEmail] = useState('')
+  const [estiloApellido, setEstiloApellidos] = useState ('')
   const [estiloNombre, setEstiloNombre] = useState('')
   const [estiloPassword, setEstiloPassword] = useState('')
   const [estiloConfirmPass, setEstiloConfirmPass] = useState('')
@@ -49,6 +51,7 @@ const CrearCuenta = () => {
     if ([email, nombre, password, confirmPassword].includes('')) {
       if (!email) setEstiloEmail('p-invalid')
       if (!nombre) setEstiloNombre('p-invalid')
+      if (!apellidos) setEstiloApellidos('p-invalid')
       if (!password) setEstiloPassword('p-invalid')
       if (!confirmPassword) setEstiloConfirmPass('p-invalid')
       setMensajeRespuesta(camposVacios)
@@ -58,6 +61,7 @@ const CrearCuenta = () => {
       return
     } else {
       setEstiloEmail('')
+      setEstiloApellidos('')
       setEstiloNombre('')
       setEstiloPassword('')
       setEstiloConfirmPass('')
@@ -100,6 +104,7 @@ const CrearCuenta = () => {
       //--> Limpiar campos
       setEmail('')
       setNombre('')
+      setApellidos('')
       setPassword('')
       setEstiloConfirmPass('')
       //--> Redireccionar
@@ -119,6 +124,7 @@ const CrearCuenta = () => {
   const cancelarCreacion = () => {
     //--> Limpiar campos de entrada antes de salir
     setNombre('')
+    setApellidos('')
     setEmail('')
     setPassword('')
     setConfirmPassword('')
@@ -126,6 +132,7 @@ const CrearCuenta = () => {
     //--> Limpiar estilos de campos de entrada
     setEstiloEmail('')
     setEstiloNombre('')
+    setEstiloApellidos('')
     setEstiloPassword('')
     setEstiloConfirmPass('')
 
@@ -137,7 +144,7 @@ const CrearCuenta = () => {
   return (
     <>
       <Head>
-        <title>Administrador - Crear usuario</title>
+        <title>Crear usuario</title>
         <meta charSet="UTF-8" />
         <meta name="description" content="El administrador podra darse de alta en el sistema" />
         <meta name="robots" content="index, follow" />
@@ -162,11 +169,18 @@ const CrearCuenta = () => {
 
               <div className="card-container mx-auto text-center ">
                 <div className='field'>
-                  <label htmlFor="nombreCompleto" className="block text-900  ">Tu nombre</label>
+                  <label htmlFor="nombreCompleto" className="block text-900  ">Nombre</label>
                   <InputText
-                    id="nombreCompleto" placeholder="Nombre y apellidos"
+                    id="nombreCompleto" placeholder="Nombre"
                     className={`${estiloNombre} w-full p-3 md:w-25rem `}
                     value={nombre} onChange={(e) => { setNombre(e.target.value) }} />
+                </div>
+                <div className='field'>
+                  <label htmlFor="Apellidos" className="block text-900  ">Apellidos</label>
+                  <InputText
+                    id="apellido" placeholder="Apellido(s)"
+                    className={`${estiloApellido} w-full p-3 md:w-25rem `}
+                    value={apellidos} onChange={(e) => { setApellidos(e.target.value) }} />
                 </div>
                 <div className='field'>
                   <label htmlFor="email" className="block text-900 ">Correo electrónico</label>

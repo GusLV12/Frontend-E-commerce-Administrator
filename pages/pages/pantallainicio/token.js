@@ -98,7 +98,7 @@ const Token = () => {
   return (
     <>
       <Head>
-        <title>Jardin del Eden - Token</title>
+        <title>Restablecer contraseña</title>
         <meta charSet="UTF-8" />
         <meta name="description" content="El usuario confirmara su cuenta creada" />
         <meta name="robots" content="index, follow" />
@@ -116,10 +116,10 @@ const Token = () => {
         <div className="xl:col-6 md:col-7 sm:col-offset-6 m-auto">
           <div className="card ">
 
-            <p className='text-center text-6xl font-bold'>Confirma tu cuenta</p>
-            <p className='text-xl text-center'>¡Gracias por elejir Jardin de Eden!</p>
+            <p className='text-center text-6xl font-bold'>Confirme su cuenta</p>
+            <p className='text-xl text-center'>¡Gracias por elegir Jardín de Edén!</p>
             <p className='text-justify'>
-              Busque en su correo electrónico un mensaje enviado con el asunto <span className='text-cyan-500 font-semibold'>E-MAIL1 Correo verificación de cuenta</span> que contiene el código de confirmación, es posible que el mensaje haya sido enviado a la carpeta SPAM o similar.
+              Verifique en su correo electrónico el e-mail con el asunto <span className='text-cyan-500 font-semibold'>"Correo verificación de cuenta" </span> que contiene el código de confirmación, es posible que el mensaje haya sido enviado a la carpeta SPAM o similar.
             </p>
 
             <div className='flex justify-content-center mt-6'>

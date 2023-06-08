@@ -157,7 +157,7 @@ const TokenResetear = () => {
   return (
     <>
       <Head>
-        <title>Jardin del Eden - Resetear password</title>
+        <title>Restablecer contraseña</title>
         <meta charSet="UTF-8" />
         <meta name="description" content="El usuario resetea su password" />
         <meta name="robots" content="index, follow" />
@@ -175,17 +175,17 @@ const TokenResetear = () => {
         <div className="xl:col-6 md:col-7 sm:col-offset-6 m-auto">
           <div className="card ">
 
-            <p className='text-center text-6xl font-bold'>Resetear password</p>
-            <p className='text-xl text-center'>¡Ingresa tu token para resetear tu password!</p>
+            <p className='text-center text-6xl font-bold'>Restablecer contraseña</p>
+            <p className='text-xl text-center'>Ingrese su token para resetear su contraseña</p> <br/>
             <p className='text-center'>
-              Para finalizar el proceso ingrese el token que recibio en su correo.
+              Para finalizar el proceso ingrese el token que recibió en su correo.
             </p>
 
             <div className='flex justify-content-center mt-6'>
               <div className="p-inputgroup" style={{ width: "380px" }}>
                 <InputText placeholder={`Código de confirmación. Tiempo: ${verTiempo}`} className={`${estiloToken}`}
                   value={token} onChange={(e) => setToken(e.target.value)} disabled={tiempo === 0} />
-                <Button label='Confirmar' onClick={confirmarUsuario} disabled={tiempo === 0} />
+                <Button label='Confirmar' severity='success' onClick={confirmarUsuario} disabled={tiempo === 0} />
               </div>
             </div>
 
@@ -220,14 +220,14 @@ const TokenResetear = () => {
         <h5>La contraseña debe tener una longitud mínima de 6 caracteres.</h5>
         <div className='flex justify-content-center my-2'>
           <Password
-            id="cpassword" placeholder='Escribe tu contraseña'
+            id="cpassword" placeholder='Mínimo 6 caracteres'
             inputClassName={`w-full p-3 md:w-25rem`} className={`${estiloPassword} `}
             value={password} onChange={(e) => setPassword(e.target.value)} feedback={false}
           />
         </div>
         <div className='flex justify-content-center my-2'>
           <Password
-            id="cpassword" placeholder='Repite tu contraseña'
+            id="cpassword" placeholder='Repita su contraseña'
             inputClassName={`w-full p-3 md:w-25rem`} className={`${estiloConfirmPass} `}
             value={confirmPass} onChange={(e) => setConfirmPass(e.target.value)} feedback={false}
           />
@@ -239,7 +239,7 @@ const TokenResetear = () => {
         )}
         <div className='flex justify-content-center mt-4'>
           <Button
-            label='Aceptar' severity="danger" className='font-bold'
+            label='Aceptar' severity="success" className='font-bold'
             onClick={nuevoPassword}
           />
 
