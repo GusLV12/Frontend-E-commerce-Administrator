@@ -86,14 +86,14 @@ const CatalogoFlores = () => {
       const arregloModificado = products.map((regis) => regis.id === product.id ? product : regis)
       setProducts(arregloModificado)
       toast.current.show({
-        severity: 'success', summary: 'Peluche actualizado', detail: 'Se ha actualizado el peluche', life: 3000
+        severity: 'success', summary: 'Producto actualizado', detail: 'Se ha actualizado correctamente la información del producto', life: 3000
       });
     }
     //--> Crear registro
     else {
       const arregloNuevo = [...products, product]
       setProducts(arregloNuevo)
-      toast.current.show({ severity: 'success', summary: 'Peluche creado', detail: 'El peluche ha sido creada', life: 3000 });
+      toast.current.show({ severity: 'success', summary: 'Producto creado', detail: 'Se ha creado correctamente el producto.', life: 3000 });
     }
     setProduct(pelucheVacio);
     setProductDialog(false);
@@ -117,7 +117,7 @@ const CatalogoFlores = () => {
     setDeleteProductDialog(false);
     setProduct(pelucheVacio);
     toast.current.show({
-      severity: 'success', summary: 'Peluche eliminado', detail: 'Se ha eliminado correctamente el peluche', life: 3000
+      severity: 'success', summary: 'Producto eliminado', detail: 'Se ha eliminado correctamente el producto.', life: 3000
     });
   };
 
@@ -133,7 +133,7 @@ const CatalogoFlores = () => {
     setDeleteProductsDialog(false);
     setSelectedProducts(null);
     toast.current.show({
-      severity: 'success', summary: 'Peluches eliminados', detail: 'Los peluches fueron eliminados', life: 3000
+      severity: 'success', summary: 'Productos eliminados', detail: 'Se ha eliminado correctamente los productos.', life: 3000
     });
   };
 
@@ -188,7 +188,7 @@ const CatalogoFlores = () => {
   //----------------| Botones de dialogos |----------------
   const cabezal = (
     <div className="flex flex-wrap gap-2 align-items-center justify-content-between">
-      <h4 className="m-0">Control de peluches</h4>
+      <h4 className="m-0">Control de Peluches</h4>
       <span className="p-input-icon-left">
         <i className="pi pi-search" />
         <InputText type="search" onInput={(e) => setGlobalFilter(e.target.value)} placeholder="Buscar..." />
@@ -199,43 +199,46 @@ const CatalogoFlores = () => {
   const botonIzquierda = () => {
     return (
       <div className="flex flex-wrap gap-2">
-        <Button label="New" icon="pi pi-plus" severity="success" onClick={abrirDialogoCM} />
-        <Button label="Delete" icon="pi pi-trash" severity="danger" onClick={confirmDeleteSelected} disabled={!selectedProducts || !selectedProducts.length} />
+        <Button label="Nuevo" icon="pi pi-plus" severity="success" onClick={abrirDialogoCM} />
+        <Button label="Eliminar" icon="pi pi-trash" severity="danger" onClick={confirmDeleteSelected} disabled={!selectedProducts || !selectedProducts.length} />
       </div>
     );
   };
 
   const botonDerecha = () => {
-    return <Button label="Export" icon="pi pi-upload" className="p-button-help" onClick={exportCSV} />;
+    return <Button label="Exportar" icon="pi pi-upload" className="p-button-help" onClick={exportCSV} />;
   };
 
   const botonesAccion = (rowData) => {
     return (
       <>
-        <Button icon="pi pi-pencil" rounded outlined className="mr-2" onClick={() => editarRegistro(rowData)} />
-        <Button icon="pi pi-trash" rounded outlined severity="danger" onClick={() => confirmarEliminarRegistro(rowData)} />
+        <Button icon="pi pi-pencil" rounded severity="warning" className="mr-2" onClick={() => editarRegistro(rowData)} />
+        <Button icon="pi pi-trash" rounded  severity="danger" onClick={() => confirmarEliminarRegistro(rowData)} />
       </>
     );
   };
 
   const botonesCrearModificar = (
     <>
-      <Button label="Cancelar" icon="pi pi-times" outlined onClick={cerrarDialogoCM} />
-      <Button label="Guardar" icon="pi pi-check" onClick={guardarRegistro} />
+      <Button label="Guardar" severity="success" icon="pi pi-check" onClick={guardarRegistro} />
+      <Button label="Cancelar"  severity="danger" icon="pi pi-times" outlined onClick={cerrarDialogoCM} />
+      
     </>
   );
 
   const botonesEliminarRegistro = (
-    <>
-      <Button label="No" icon="pi pi-times" outlined onClick={cerrarDialogoEliminarRegistro} />
-      <Button label="Si" icon="pi pi-check" severity="danger" onClick={eliminarRegistro} />
+    <> 
+    <Button label="Sí" icon="pi pi-check" severity="success" onClick={eliminarRegistro} />
+      <Button label="No" icon="pi pi-times"  severity="danger" onClick={cerrarDialogoEliminarRegistro} />
+     
     </>
   );
 
   const botonesEliminarRegistros = (
     <>
-      <Button label="No" icon="pi pi-times" outlined onClick={cerrarDialogoEliminarRegistros} />
-      <Button label="Si" icon="pi pi-check" severity="danger" onClick={deleteSelectedProducts} />
+    <Button label="Sí" icon="pi pi-check" severity="success" onClick={deleteSelectedProducts} />
+      <Button label="No" icon="pi pi-times" severity="danger" onClick={cerrarDialogoEliminarRegistros} />
+      
     </>
   );
 
@@ -243,7 +246,7 @@ const CatalogoFlores = () => {
   return (
     <Layout
       title="Peluches"
-      description="Acceso al catalogo de peluches"
+      description="Acceso al catálogo de peluches"
     >
       <div className="grid">
         <Toast ref={toast} />
@@ -263,9 +266,9 @@ const CatalogoFlores = () => {
               <Column field="nombre" header="Nombre" sortable style={{ minWidth: '16rem', textAlign: "center" }} />
               <Column field="precio" header="Precio" body={plantillaPrecio} sortable
                 style={{ minWidth: '8rem', textAlign: "center" }} />
-              <Column field="categoria" header="Categoria" sortable style={{ minWidth: '10rem', textAlign: "center" }} />
+              <Column field="categoria" header="Categoría" sortable style={{ minWidth: '10rem', textAlign: "center" }} />
               {/* <Column field="rating" header="Reviews" body={ratingBodyTemplate} sortable style={{ minWidth: '12rem' }}></Column> */}
-              <Column field="image" header="Imagenes" body={plantillaImagen} />
+              <Column field="image" header="Imágenes" body={plantillaImagen} />
               <Column field="estatus" header="Estatus" body={plantillaEstatus} sortable
                 style={{ minWidth: '12rem', textAlign: "center" }} />
               <Column header="Editar" body={botonesAccion} exportable={false} style={{ minWidth: '12rem' }} />
@@ -296,7 +299,7 @@ const CatalogoFlores = () => {
                   />
                 </div>
                 <div className="field col">
-                  <label htmlFor="categoria" className="font-bold">Categoria/Evento</label>
+                  <label htmlFor="categoria" className="font-bold">Categoría/Evento</label>
                   <Dropdown
                     value={product.categoria} onChange={(e) => cambiarString(e, 'categoria')}
                     options={listaCategorias} optionLabel="nombre" optionValue="valor"
@@ -347,7 +350,7 @@ const CatalogoFlores = () => {
                 <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: '2rem' }} />
                 {product && (
                   <span>
-                    Estas seguro de eliminar <b>{product.nombre}</b>?
+                    ¿Está seguro de eliminar <b>{product.nombre}</b>?
                   </span>
                 )}
               </div>
@@ -356,7 +359,7 @@ const CatalogoFlores = () => {
             <Dialog visible={deleteProductsDialog} style={{ width: '32rem' }} breakpoints={{ '960px': '75vw', '641px': '90vw' }} header="Confirm" modal footer={botonesEliminarRegistros} onHide={cerrarDialogoEliminarRegistros}>
               <div className="confirmation-content">
                 <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: '2rem' }} />
-                {product && <span>Estas seguro de eliminar los registros?</span>}
+                {product && <span>¿Estás seguro de eliminar los registros?</span>}
               </div>
             </Dialog>
           </div>

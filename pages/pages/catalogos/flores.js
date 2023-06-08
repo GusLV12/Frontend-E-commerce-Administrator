@@ -248,7 +248,7 @@ const CatalogoFlores = () => {
       }
     })
     toast.current.show({
-      severity: 'success', summary: 'Productos eliminados', detail: 'Los productos fueron eliminados', life: 3000
+      severity: 'success', summary: 'Productos eliminados', detail: 'Se ha eliminados correctamente los productos.', life: 3000
     });
   };
 
@@ -330,30 +330,33 @@ const CatalogoFlores = () => {
   const botonesAccion = (rowData) => {
     return (
       <>
-        <Button icon="pi pi-pencil" rounded outlined className="mr-2" onClick={() => editarRegistro(rowData)} />
-        <Button icon="pi pi-trash" rounded outlined severity="danger" onClick={() => confirmarEliminarRegistro(rowData)} />
+        <Button icon="pi pi-pencil" rounded severity="warning" className="mr-2" onClick={() => editarRegistro(rowData)} />
+        <Button icon="pi pi-trash" rounded  severity="danger" onClick={() => confirmarEliminarRegistro(rowData)} />
       </>
     );
   };
 
   const botonesCrearModificar = (
-    <>
-      <Button label="Cancelar" icon="pi pi-times" outlined onClick={cerrarDialogoCM} />
-      <Button label="Guardar" icon="pi pi-check" onClick={guardarRegistro} />
+    <> 
+      <Button label="Guardar"  severity="success" icon="pi pi-check" onClick={guardarRegistro} />
+      <Button label="Cancelar" security="danger" icon="pi pi-times" outlined onClick={cerrarDialogoCM} />
+     
     </>
   );
 
   const botonesEliminarRegistro = (
     <>
-      <Button label="No" icon="pi pi-times" outlined onClick={cerrarDialogoEliminarRegistro} />
-      <Button label="Si" icon="pi pi-check" severity="danger" onClick={quitarProducto} />
+    <Button label="Sí" icon="pi pi-check" severity="success" onClick={quitarProducto} />
+      <Button label="No" icon="pi pi-times" severity="danger" onClick={cerrarDialogoEliminarRegistro} />
+      
     </>
   );
 
   const botonesEliminarRegistros = (
-    <>
-      <Button label="No" icon="pi pi-times" outlined onClick={cerrarDialogoEliminarRegistros} />
-      <Button label="Si" icon="pi pi-check" severity="danger" onClick={deleteSelectedProducts} />
+    <> 
+      <Button label="Sí" icon="pi pi-check" severity="success" onClick={deleteSelectedProducts} />
+      <Button label="No" icon="pi pi-times" severity="danger" onClick={cerrarDialogoEliminarRegistros} />
+     
     </>
   );
 
@@ -361,7 +364,7 @@ const CatalogoFlores = () => {
   return (
     <Layout
       title="Flores"
-      description="Acceso al catalogo de flores"
+      description="Acceso al catálogo de flores"
     >
       <div className="grid">
         <Toast ref={toast} />
@@ -384,7 +387,7 @@ const CatalogoFlores = () => {
                 sortable style={{ minWidth: '12rem', textAlign: "center" }} />
               <Column field="cantidadInv" header="Cantidad" sortable body={plantillaCantiddad}
                 style={{ minWidth: '12rem', textAlign: "center" }} />
-              <Column field="categoriaProducto" header="Categoria" sortable style={{ minWidth: '12rem', textAlign: "center" }} />
+              <Column field="categoriaProducto" header="Categoría" sortable style={{ minWidth: '12rem', textAlign: "center" }} />
               <Column field="descuentoProducto" header="Descuento" sortable body={plantillaPorcentaje}
                 style={{ minWidth: '12rem', textAlign: "center" }} />
               <Column field="precioDescuento" header="Precio de descuento" sortable body={plantillaDescuentoPrecio}
@@ -448,7 +451,7 @@ const CatalogoFlores = () => {
                   <Dropdown
                     value={product.tipoProducto} onChange={(e) => cambiarString(e, 'tipoProducto')}
                     options={listaTipos} optionLabel="nombre" optionValue="valor"
-                    placeholder="Escoge una categoria" className="w-full md:w-14rem" />
+                    placeholder="Elija una categoría" className="w-full md:w-14rem" />
                 </div>
               </div>
 
@@ -469,7 +472,7 @@ const CatalogoFlores = () => {
                 </div>
               </div>
               <div className="field">
-                <label htmlFor="categoria" className="font-bold">Categoria</label>
+                <label htmlFor="categoria" className="font-bold">Categoría</label>
                 <InputText
                   id="categoria" value={product.categoriaProducto} onChange={(e) => cambiarString(e, 'categoriaProducto')}
                   required autoFocus className={classNames({ 'p-invalid': submitted && !product.categoriaProducto })}
@@ -506,7 +509,7 @@ const CatalogoFlores = () => {
                 <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: '2rem' }} />
                 {product && (
                   <span>
-                    Estas seguro de eliminar <b>{product.nombreProducto}</b>?
+                    ¿Está seguro de eliminar <b>{product.nombreProducto}</b>?
                   </span>
                 )}
               </div>
@@ -515,7 +518,7 @@ const CatalogoFlores = () => {
             <Dialog visible={deleteProductsDialog} style={{ width: '32rem' }} breakpoints={{ '960px': '75vw', '641px': '90vw' }} header="Confirm" modal footer={botonesEliminarRegistros} onHide={cerrarDialogoEliminarRegistros}>
               <div className="confirmation-content">
                 <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: '2rem' }} />
-                {product && <span>Estas seguro de eliminar los registros?</span>}
+                {product && <span>¿Está seguro de eliminar los registros?</span>}
               </div>
             </Dialog>
           </div>

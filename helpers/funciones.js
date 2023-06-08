@@ -11,3 +11,13 @@ export const temporizador = (tiempo) => {
 export const formatoPrecio = (value) => {
   return value.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
 };
+
+export const FormatoFecha = ({ fechaDev }) => {
+  const formattedDate = new Date(fechaDev).toLocaleDateString('en-US', {
+   
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+ 
+  } ) 
+};

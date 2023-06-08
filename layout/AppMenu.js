@@ -9,25 +9,25 @@ const AppMenu = () => {
 
   const model = [
     {
-      label: 'Home',
+      label: 'Inicio',
       items: [{ label: 'Dashboard', icon: 'pi pi-fw pi-home', to: '/pages/dashboard' }]
     },
     {
-      label: 'Catalogos',
+      label: 'Modificación de Datos',
       items: [
         { label: 'Productos', icon: 'pi pi-fw pi-database', to: '/pages/catalogos/flores' },
-        // { label: 'Peluches', icon: 'pi pi-fw pi-id-card', to: '/pages/catalogos/peluches' },
-        // { label: 'Ofertas', icon: 'pi pi-fw pi-tags', to: '/pages/catalogos/ofertas' },
+         { label: 'Temporadas', icon: 'pi pi-fw pi-id-card' },
+        
       ]
     },
-    // {
-    //   label: 'Usuario',
-    //   items: [
-    //     { label: 'Personalizar arreglo', icon: 'pi pi-fw pi-gift', to: '/pages/usuario/personalizararreglo' },
-    //     { label: 'Mis Compras', icon: 'pi pi-fw pi-shopping-bag', to: '/pages/usuario/miscompras' },
-    //     { label: 'Atención al cliente', icon: 'pi pi-fw pi-comments', to: '/pages/usuario/atencionclientes' },
-    //   ]
-    // }
+    {
+      label: 'Visualización de Registros',
+      items: [
+        { label: 'Ordenes', icon: 'pi pi-fw pi-truck' },
+        { label: 'Cancelaciones', icon: 'pi pi-fw pi-times-circle', to: '/pages/usuario/cancelaciones' },
+        { label: 'Devoluciones', icon: 'pi pi-fw pi-comments' },
+      ]
+    }
   ];
 
   return (

@@ -9,14 +9,14 @@ export const contraOlvidada = '¿Olvidaste tu contraseña?'
 export const mailcontraIncorrecto = 'Correo o contraseña incorrectos.'
 
 //--> Resetear password
-export const resetearExitoso = "Envio exitoso, revisa tu correo."
+export const resetearExitoso = "Envío exitoso, revisa tu correo."
 export const exitoResetPassword = "La contraseña ha sido cambiada."
 
 //--> Token
-export const tokenInvalido = "Token invalido."
+export const tokenInvalido = "Token inválido."
 export const tokenExpirado = 'El código de verificación ha expirado.'
-export const longiudTokenInvalida = "Longitud del token invalida"
-export const exitoToken = "Token correcto"
+export const longiudTokenInvalida = "Longitud del token invalida."
+export const exitoToken = "Token correcto."
 
 
 //--> Pago

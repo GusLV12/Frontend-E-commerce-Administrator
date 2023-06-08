@@ -56,7 +56,7 @@ const RestablecerPassword = () => {
   return (
     <>
       <Head>
-        <title>Jardin del Eden - Restablecer</title>
+        <title>Restablecer contraseña</title>
         <meta charSet="UTF-8" />
         <meta name="description" content="El usuario restablecera su password mediante su correo" />
         <meta name="robots" content="index, follow" />
@@ -74,11 +74,11 @@ const RestablecerPassword = () => {
         <Toast ref={toast} />
         <div className="xl:col-6 md:col-7 sm:col-offset-6 m-auto">
           <div className="card ">
-            <p className='text-center text-4xl font-bold underline'>Restableciendo contraseña</p>
+            <p className='text-center text-4xl font-bold underline'>Restablecer contraseña</p>
 
             <div className="card-container mx-auto text-center">
               <div className="field">
-                <label htmlFor="correo" className="block text-900 text-xl font-medium mb-2">Ingresa tu correo</label>
+                <label htmlFor="correo" className="block text-900 text-xl font-medium mb-2">Ingrese su correo</label>
                 <span className="p-input-icon-left">
                   <i className="pi pi-user" />
                   <InputText
