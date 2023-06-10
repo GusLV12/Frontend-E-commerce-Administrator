@@ -42,6 +42,17 @@ const Devoluciones = () => {
   const [globalFilter, setGlobalFilter] = useState(null);
   //--> Mensajes
   const [mensajeRespuesta, setMensajeRespuesta] = useState('')
+    //-> Estatus Pedido
+   //---------- | Modificar Status | ------------
+   const [displayDialog, setDisplayDialog] = useState(false);
+   const [pedidoStatus, setPedidoStatus] = useState('');
+   const [estatusOptions, setEstatusOptions] = useState([
+     { label: 'Pendiente', value: 'Pendiente' },
+     { label: 'Procesada', value: 'Procesada' },
+     { label: 'Rechazada', value: 'Rechazada' }
+   ]);
+
+
   //--> Especiales
   const toast = useRef(null);
   const dt = useRef(null);
@@ -80,6 +91,28 @@ const Devoluciones = () => {
   const cerrarDialogoEliminarRegistro = () => { setDeleteOrderDialog(false) };
 const cerrarDialogoEliminarRegistros = () => { setDeleteOrdersDialog(false) }
 
+//------------- | Dialogo Estatus |-------- 
+
+const handleButtonClick = () => {
+    setDisplayDialog(true);
+  };
+
+  const handleDialogHide = () => {
+    setDisplayDialog(false);
+  };
+
+  const handleStatusChange = (order) => {
+   
+    setOrder({ ...order });
+    setOrderDialog(true);
+
+    toast.current.show({
+      severity: 'success', summary: 'Estatus Guardado', detail: 'Se ha actualizado correctamente el estatus del pedido', life: 3000
+    });
+    
+       
+    setDisplayDialog(false);
+  };
   //----------------| Funciones Back-end |----------------
  
     //--> Editar registro
@@ -112,10 +145,10 @@ const cerrarDialogoEliminarRegistros = () => { setDeleteOrdersDialog(false) }
     setOrderDialog(false);
   };
   
-  const editarRegistro = (order) => {
-    setOrder({ ...order });
-    setOrderDialog(true);
-  };
+//   const editarRegistro = (order) => {
+//     setOrder({ ...order });
+//     setOrderDialog(true);
+//   };
 
   const eliminarRegistro = () => {
     //--> Registros que no sean los seleccionados
@@ -150,7 +183,7 @@ const cerrarDialogoEliminarRegistros = () => { setDeleteOrdersDialog(false) }
   //----------------| Botones de dialogos |----------------
   const cabezal = (
     <div className="flex flex-wrap gap-2 align-items-center justify-content-between">
-      <h4 className="m-0">Regisitro de Devoluciones</h4>
+      <h4 className="m-0">Registro de Devoluciones</h4>
       <span className="p-input-icon-left">
         <i className="pi pi-search" />
         <InputText type="search" onInput={(e) => setGlobalFilter(e.target.value)} placeholder="Buscar..." />
@@ -171,8 +204,9 @@ const cerrarDialogoEliminarRegistros = () => { setDeleteOrdersDialog(false) }
   const botonesAccion = (rowData) => {
     return (
       <>
-        <Button icon="pi pi-check-square"  severity="success" label="Validar"  onClick={() => editarRegistro(rowData)}  /> 
-        {/* onClick={() => {() => editarRegistro(rowData)}}  */}
+        <Button icon="pi pi-check-square"  severity="success" label="Validar" onClick={handleButtonClick}    /> 
+        
+        {/* onClick={() => {() => editarRegistro(rowData)}} */}
         <Button icon="pi pi-trash" severity="danger" onClick={() => confirmarEliminarRegistro(rowData)} label="Eliminar" />
       </>
     );
@@ -229,16 +263,23 @@ const cerrarDialogoEliminarRegistros = () => { setDeleteOrdersDialog(false) }
             </DataTable>
 
             <Dialog
-              visible={orderDialog} style={{ width: '32rem' }} breakpoints={{ '960px': '75vw', '641px': '90vw' }} header="Disputa de Devolución" modal className="p-fluid" footer={botonesCrearModificar} onHide={cerrarDialogoCM}
-            >
-              {order.image && (
-                <img
-                  src={`https://primefaces.org/cdn/primereact/images/product/${order.image}`}
-                  alt={order.image} className="product-image block m-auto pb-3" />
-              )}
-              <div className="field">
-                <label htmlFor="nombre" className="font-bold">Nombre del Cliente: </label>
-                <label> {order.nomCliente} </label> <br/> <br/>
+        visible={displayDialog}
+        style={{ width: '32rem' }} breakpoints={{ '960px': '75vw', '641px': '90vw' }}
+        modal className="p-fluid" 
+        onHide={handleDialogHide}
+        header="Modificar estado del pedido"
+        footer={
+          <div>
+            <Button label="Guardar" severity="success" onClick={handleStatusChange} autoFocus />
+            <Button label="Cancelar" severity="danger" onClick={handleDialogHide}  />
+            
+          </div>
+        }
+      >
+        <div>
+       
+        <div className="field">
+                <label htmlFor="nombre" className="font-bold">Nombre del Cliente:  {order.nomCliente} </label> <br/> <br/>
                  <label htmlFor="nombre" className="font-bold">Producto a Devolver: </label>
                 <label> {order.idProducto} </label> <br/> <br/>
                  <label htmlFor="idCliente" className="font-bold">Motivo: </label>
@@ -251,32 +292,24 @@ const cerrarDialogoEliminarRegistros = () => { setDeleteOrdersDialog(false) }
                
               </div>
 
-              <div className="field">
-                <label className="mb-3 font-bold">Estatus de la Disputa</label>
-                <div className="formgrid grid">
-                  <div className="field-radiobutton col-4">
-                    <RadioButton
-                      inputId="estatus1" name="estadoDev" value="Procesada" onChange={cambiarEstatus}
-                      checked={order.estatus === 'Procesada'} />
-                    <label htmlFor="estatus1">Procesada</label>
-                  </div>
-                  <div className="field-radiobutton col-4">
-                    <RadioButton
-                      inputId="estatus2" name="estadoDev" value="Pendiente" onChange={cambiarEstatus}
-                      checked={order.estatus === 'Pendiente'} />
-                    <label htmlFor="estatus2">Pendiente</label>
-                  </div>
-                  <div className="field-radiobutton col-4">
-                    <RadioButton
-                      inputId="estatus3" name="estadoDev" value="Rechazada" onChange={cambiarEstatus}
-                      checked={order.estatus === 'Rechazada'} />
-                    <label htmlFor="estatus3">Rechazada</label>
-                  </div>
-                </div>
-              </div>
-              
+          <h5>Nuevo estado del pedido:</h5> <br/>
+          {estatusOptions.map((option) => (
+            <div key={option.value}>
+              <RadioButton
+                inputId={option.value}
+                name="pedidoStatus"
+                value={option.value}
+                onChange={(e) => setPedidoStatus(e.value)}
+                checked={pedidoStatus === option.value}
+              />
+              <label htmlFor={option.value}>{option.label}</label>
+            </div>
+          ))}
+        </div>
+      </Dialog>
 
-            </Dialog>
+
+         
 
             <Dialog
               visible={deleteOrderDialog} style={{ width: '32rem' }}
