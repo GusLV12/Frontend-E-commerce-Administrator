@@ -20,9 +20,9 @@ const AppMenu = () => {
     {
       label: 'Visualización de Registros',
       items: [
-        { label: 'Ordenes', icon: 'pi pi-fw pi-truck' },
+        { label: 'Ordenes', icon: 'pi pi-fw pi-truck' , to: '/pages/usuario/ordenes'},
         { label: 'Cancelaciones', icon: 'pi pi-fw pi-times-circle', to: '/pages/usuario/cancelaciones' },
-        { label: 'Devoluciones', icon: 'pi pi-fw pi-comments' },
+        { label: 'Devoluciones', icon: 'pi pi-fw pi-comments', to: '/pages/usuario/devoluciones'  },
       ]
     }
   ];
