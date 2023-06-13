@@ -15,17 +15,22 @@ import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
 import { Dropdown } from 'primereact/dropdown';
 import { Message } from 'primereact/message';
+
 //--> Funciones propias
 import { objetoVacio } from "@/components/catalogos/objetovacio";
 import { formatoPrecio } from "@/helpers/funciones";
 import { camposVacios, descripcionInvalida, descuendoInvalido, nombreInvalido } from "@/helpers/constantes/mensajes";
 import { listaTipos } from "@/components/catalogos/listas";
-import { consultarProductos, editarProducto, eliminarProducto } from "@/helpers/constantes/links";
+import { consultarProductos, editarProducto, eliminarProducto, nuevoProducto } from "@/helpers/constantes/links";
 import { alfaNumericoEspacios, descuento } from "@/helpers/constantes/expresionesregulares";
+import { categoriaFlores, categoriaPeluches } from "@/helpers/dropproductos";
 
 const CatalogoProductos = () => {
-  // --> Estructura de objeto vacio
+  // --> Estructura de objetos
   let productoVacio = objetoVacio
+  const listaCategoriasFlores = categoriaFlores
+  const listaCategoriasPeluches = categoriaPeluches
+
   // --> Validar cualquier string 
   const validarString = alfaNumericoEspacios
   const validarDescuento = descuento
@@ -126,7 +131,7 @@ const CatalogoProductos = () => {
       }
     }
     try {
-      const respuesta = await axios.post("http://localhost:27017/api/productos", productoNuevo, cabecera)
+      const respuesta = await axios.post(nuevoProducto, productoNuevo, cabecera)
       setTimeout(() => {
         obtenerProductos()
         toast.current.show({
@@ -234,7 +239,7 @@ const CatalogoProductos = () => {
   //--> DELETE
   const quitarProducto = async () => {
     console.log("Eliminando producto...")
-    console.log(product)
+    // console.log(product)
     //--> Crear objeto a eliminar
     const objetoEliminar = { nombreProducto: product.nombreProducto }
     const token = localStorage.getItem('token')
@@ -344,12 +349,12 @@ const CatalogoProductos = () => {
   };
 
   //----------------| Funciones para editar |----------------
-  const cambiarEstatus = (e) => {
-    let _product = { ...product };
+  // const cambiarEstatus = (e) => {
+  //   let _product = { ...product };
 
-    _product['estatus'] = e.value;
-    setProduct(_product);
-  };
+  //   _product['estatus'] = e.value;
+  //   setProduct(_product);
+  // };
 
   const cambiarString = (e, name) => {
     const val = (e.target && e.target.value) || '';
@@ -461,7 +466,7 @@ const CatalogoProductos = () => {
         <Toast ref={toast} />
         <div className="col-12">
           <div className="card">
-            <Toolbar className="mb-4" left={botonIzquierda} right={botonDerecha} />
+            <Toolbar className="mb-4" start={botonIzquierda} end={botonDerecha} />
 
             <DataTable
               ref={dt} value={products} selection={selectedProducts} onSelectionChange={(e) => setSelectedProducts(e.value)}
@@ -553,11 +558,12 @@ const CatalogoProductos = () => {
                 </div>
               </div>
               <div className="field">
-                <label htmlFor="categoria" className="font-bold">Categoría</label>
-                <InputText
-                  id="categoria" value={product.categoriaProducto} onChange={(e) => cambiarString(e, 'categoriaProducto')}
-                  required autoFocus className={estiloCategoria}
-                />
+                <label className="font-bold">Categoría</label>
+                <Dropdown
+                  value={product.categoriaProducto} onChange={(e) => cambiarString(e, 'categoriaProducto')}
+                  options={product.tipoProducto === 'Flor' ? listaCategoriasFlores : listaCategoriasPeluches}
+                  optionLabel="categoria" optionValue="valor"
+                  placeholder="Elija una categoría" className={`w-full ${estiloCategoria}`} />
               </div>
 
               <div className="flex justify-content-around">
