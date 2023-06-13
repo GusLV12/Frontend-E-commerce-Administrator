@@ -12,3 +12,11 @@ export let objetoVacio = {
     "C:/Users/uriel/OneDrive/Escritorio/Uriel/Whoami/Multimedia/Imagenes/cubo.jpg"
   ]
 }
+
+export let temporadaVacia = {
+  nombreTemporada: "",
+  descrTemporada: "",
+  peluches: "",
+  flores: "",
+  descuentoTemporada: 0
+}

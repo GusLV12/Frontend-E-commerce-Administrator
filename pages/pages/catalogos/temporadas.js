@@ -17,17 +17,17 @@ import { Dropdown } from 'primereact/dropdown';
 import { Message } from 'primereact/message';
 
 //--> Funciones propias
-import { objetoVacio } from "@/components/catalogos/objetovacio";
+import { temporadaVacia } from "@/components/catalogos/objetovacio";
 import { formatoPrecio } from "@/helpers/funciones";
 import { camposVacios, descripcionInvalida, descuendoInvalido, nombreInvalido } from "@/helpers/constantes/mensajes";
 import { listaTipos } from "@/components/catalogos/listas";
-import { consultarProductos, editarProducto, eliminarProducto, nuevoProducto } from "@/helpers/constantes/links";
+import { eliminarTemporada, listaFlores, listaPeluches, modificarTemporada, nuevaTemporada, verTemporadas } from "@/helpers/constantes/links";
 import { alfaNumericoEspacios, descuento } from "@/helpers/constantes/expresionesregulares";
 import { categoriaFlores, categoriaPeluches } from "@/helpers/dropproductos";
 
-const CatalogoProductos = () => {
+const Temporadas = () => {
   // --> Estructura de objetos
-  let productoVacio = objetoVacio
+  let productoVacio = temporadaVacia
   const listaCategoriasFlores = categoriaFlores
   const listaCategoriasPeluches = categoriaPeluches
 
@@ -39,6 +39,9 @@ const CatalogoProductos = () => {
   //--> Registros
   const [product, setProduct] = useState(productoVacio);
   const [products, setProducts] = useState(null);
+  //--> Lista de dropdowns
+  const [floresDrop, setFloresDrop] = useState([]);
+  const [peluchesDrop, setPeluchesDrop] = useState([]);
   //--> Edicion
   const [nombreNuevo, setNombreNuevo] = useState('')
   //--> Dialogos
@@ -48,14 +51,12 @@ const CatalogoProductos = () => {
   //--> Estilos
   const [estiloNombre, setEstiloNombre] = useState('')
   const [estiloDescripcion, setEstiloDescripcion] = useState('')
-  const [estiloTP, setEstiloTP] = useState('')
+  const [estiloPeluches, setEstiloPeluches] = useState('')
   const [estiloDescuento, setEstiloDescuento] = useState('')
-  const [estiloCategoria, setEstiloCategoria] = useState('')
-  // const [estiloNuevoNombre, setEstiloNuevoNombre] = useState('')
+  const [estiloFlores, setEstiloFlores] = useState('')
   //--> Otros
   const [editar, setEditar] = useState(false)
   const [selectedProducts, setSelectedProducts] = useState(null);
-  const [submitted, setSubmitted] = useState(false);
   const [globalFilter, setGlobalFilter] = useState(null);
   //--> Mensajes
   const [mensajeRespuesta, setMensajeRespuesta] = useState('')
@@ -68,9 +69,9 @@ const CatalogoProductos = () => {
   const obtenerProductos = async () => {
     console.log("Obteniendo productos...")
     try {
-      const datos = await axios.get(consultarProductos)
-      // console.log(datos.data.products)
-      setProducts(datos.data.products)
+      const datos = await axios.get(verTemporadas)
+      // console.log(datos.data.seasons)
+      setProducts(datos.data.seasons)
     } catch (error) { console.log(error) }
   }
 
@@ -79,21 +80,21 @@ const CatalogoProductos = () => {
     console.log("Creando producto...")
     //--> Validar campos llenos
     if (Object.values(productoNuevo).includes('')) {
-      if (!productoNuevo.nombreProducto) setEstiloNombre('p-invalid')
-      if (!productoNuevo.descrProducto) setEstiloDescripcion('p-invalid')
-      if (!productoNuevo.tipoProducto) setEstiloTP('p-invalid')
-      if (!productoNuevo.categoriaProducto) setEstiloCategoria('p-invalid')
+      if (!productoNuevo.nombreTemporada) setEstiloNombre('p-invalid')
+      if (!productoNuevo.descrTemporada) setEstiloDescripcion('p-invalid')
+      if (!productoNuevo.peluches) setEstiloPeluches('p-invalid')
+      if (!productoNuevo.flores) setEstiloFlores('p-invalid')
       setMensajeRespuesta(camposVacios)
       setTimeout(() => { setMensajeRespuesta('') }, 3000)
       return
     } else {
       setEstiloNombre('')
       setEstiloDescripcion('')
-      setEstiloTP('')
-      setEstiloCategoria('')
+      setEstiloPeluches('')
+      setEstiloFlores('')
     }
     //--> Validar Nombre
-    if (!validarString.test(productoNuevo.nombreProducto)) {
+    if (!validarString.test(productoNuevo.nombreTemporada)) {
       setEstiloNombre('p-invalid')
       setMensajeRespuesta(nombreInvalido)
       setTimeout(() => { setMensajeRespuesta('') }, 3000)
@@ -103,7 +104,7 @@ const CatalogoProductos = () => {
       setMensajeRespuesta('')
     }
     //--> Validar descripción
-    if (!validarString.test(productoNuevo.descrProducto)) {
+    if (!validarString.test(productoNuevo.descrTemporada)) {
       setEstiloDescripcion('p-invalid')
       setMensajeRespuesta(descripcionInvalida)
       setTimeout(() => { setMensajeRespuesta('') }, 3000)
@@ -113,7 +114,7 @@ const CatalogoProductos = () => {
       setMensajeRespuesta('')
     }
     //--> Validar descuento
-    if (!validarDescuento.test(productoNuevo.descuentoProducto)) {
+    if (!validarDescuento.test(productoNuevo.descuentoTemporada)) {
       setEstiloDescuento('p-invalid')
       setMensajeRespuesta(descuendoInvalido)
       setTimeout(() => { setMensajeRespuesta('') }, 3000)
@@ -131,14 +132,9 @@ const CatalogoProductos = () => {
       }
     }
     try {
-      const respuesta = await axios.post(nuevoProducto, productoNuevo, cabecera)
-      setTimeout(() => {
-        obtenerProductos()
-        toast.current.show({
-          severity: 'success', summary: `${respuesta.data.msg}`, life: 3000
-        });
-      }, 6000);
-
+      const respuesta = await axios.post(nuevaTemporada, productoNuevo, cabecera)
+      obtenerProductos()
+      toast.current.show({ severity: 'success', summary: `${respuesta.data.msg}`, life: 3000 });
       cerrarDialogoCM()
       setProduct(productoVacio)
     } catch (error) {
@@ -154,21 +150,21 @@ const CatalogoProductos = () => {
     // console.log(productoEditar)
     //--> Validar campos llenos
     if (Object.values(productoEditar).includes('') || nombreNuevo === '') {
-      if (!productoEditar.nombreProducto) setEstiloNombre('p-invalid')
-      if (!productoEditar.descrProducto) setEstiloDescripcion('p-invalid')
-      if (!productoEditar.tipoProducto) setEstiloTP('p-invalid')
-      if (!productoEditar.categoriaProducto) setEstiloCategoria('p-invalid')
+      if (!productoEditar.nombreTemporada) setEstiloNombre('p-invalid')
+      if (!productoEditar.descrTemporada) setEstiloDescripcion('p-invalid')
+      // if (!productoEditar.peluches) setEstiloPeluches('p-invalid')
+      // if (!productoEditar.flores) setEstiloFlores('p-invalid')
       setMensajeRespuesta(camposVacios)
       setTimeout(() => { setMensajeRespuesta('') }, 3000)
       return
     } else {
       setEstiloNombre('')
       setEstiloDescripcion('')
-      setEstiloTP('')
-      setEstiloCategoria('')
+      // setEstiloPeluches('')
+      // setEstiloFlores('')
     }
     //--> Validar Nombre
-    if (!validarString.test(productoEditar.nombreProducto)) {
+    if (!validarString.test(productoEditar.nombreTemporada)) {
       setEstiloNombre('p-invalid')
       setMensajeRespuesta(nombreInvalido)
       setTimeout(() => { setMensajeRespuesta('') }, 3000)
@@ -178,7 +174,7 @@ const CatalogoProductos = () => {
       setMensajeRespuesta('')
     }
     //--> Validar descripción
-    if (!validarString.test(productoEditar.descrProducto)) {
+    if (!validarString.test(productoEditar.descrTemporada)) {
       setEstiloDescripcion('p-invalid')
       setMensajeRespuesta(descripcionInvalida)
       setTimeout(() => { setMensajeRespuesta('') }, 3000)
@@ -188,7 +184,7 @@ const CatalogoProductos = () => {
       setMensajeRespuesta('')
     }
     //--> Validar descuento
-    if (!validarDescuento.test(productoEditar.descuentoProducto)) {
+    if (!validarDescuento.test(productoEditar.descuentoTemporada)) {
       setEstiloDescuento('p-invalid')
       setMensajeRespuesta(descuendoInvalido)
       setTimeout(() => { setMensajeRespuesta('') }, 3000)
@@ -206,20 +202,14 @@ const CatalogoProductos = () => {
       }
     }
     const objetoEnviar = {
-      nombreProducto: product.nombreProducto,
-      nuevoNombre: nombreNuevo,
-      descrProducto: product.descrProducto,
-      tipoProducto: product.tipoProducto,
-      precioProducto: product.precioProducto,
-      descuentoProducto: product.descuentoProducto,
-      cantidadInv: product.cantidadInv,
-      categoriaProducto: product.categoriaProducto,
-      imagenesAdd: [],
-      imagenesRem: []
+      nombreTemporada: product.nombreTemporada,
+      newName: nombreNuevo,
+      descrTemporada: product.descrTemporada,
+      descuentoTemporada: product.descuentoTemporada,
     }
     //--> Mandar objeto al back-end
     try {
-      const respuesta = await axios.post(editarProducto, objetoEnviar, cabecera)
+      const respuesta = await axios.post(modificarTemporada, objetoEnviar, cabecera)
       toast.current.show({
         severity: 'success', summary: `${respuesta.data.msg}`, life: 3000
       });
@@ -232,8 +222,8 @@ const CatalogoProductos = () => {
       //--> Renderizar despues de enviar
       obtenerProductos()
     } catch (error) {
-      console.log(error.response.data)
-      setMensajeRespuesta(error.response.data)
+      // console.log(error.response.data)
+      setMensajeRespuesta(error.response.data.msg)
       setTimeout(() => { setMensajeRespuesta('') }, 3000);
     }
   }
@@ -241,9 +231,9 @@ const CatalogoProductos = () => {
   //--> DELETE
   const quitarProducto = async () => {
     console.log("Eliminando producto...")
-    // console.log(product)
+    console.log(product)
     //--> Crear objeto a eliminar
-    const objetoEliminar = { nombreProducto: product.nombreProducto }
+    const objetoEliminar = { nombreTemporada: product.nombreTemporada }
     const token = localStorage.getItem('token')
     const cabecera = {
       headers: {
@@ -252,7 +242,7 @@ const CatalogoProductos = () => {
     }
     //--> Mandar objeto a back-end
     try {
-      const respuesta = await axios.post(eliminarProducto, objetoEliminar, cabecera)
+      const respuesta = await axios.post(eliminarTemporada, objetoEliminar, cabecera)
       console.log(respuesta.data.msg)
       toast.current.show({
         severity: 'success', summary: `${respuesta.data.msg}`, life: 3000
@@ -279,6 +269,11 @@ const CatalogoProductos = () => {
     else setEditar(false)
   }, [product])
 
+  //--> lista de dropdonws
+  useEffect(() => { axios.get(listaFlores).then((e) => { setFloresDrop(e.data.fleurs) }) }, [])
+  useEffect(() => { axios.get(listaPeluches).then((e) => { setPeluchesDrop(e.data.plushies) }) }, [])
+
+
   //----------------| Interaccion con dialogos |----------------
   const abrirDialogoCM = () => {
     setProduct(productoVacio);
@@ -288,8 +283,8 @@ const CatalogoProductos = () => {
     setEstiloNombre('')
     setEstiloDescripcion('')
     setEstiloDescuento('')
-    setEstiloCategoria('')
-    setEstiloTP('')
+    setEstiloFlores('')
+    setEstiloPeluches('')
   };
 
   const cerrarDialogoCM = () => { setProductDialog(false) };
@@ -351,13 +346,6 @@ const CatalogoProductos = () => {
   };
 
   //----------------| Funciones para editar |----------------
-  // const cambiarEstatus = (e) => {
-  //   let _product = { ...product };
-
-  //   _product['estatus'] = e.value;
-  //   setProduct(_product);
-  // };
-
   const cambiarString = (e, name) => {
     const val = (e.target && e.target.value) || '';
     let _product = { ...product };
@@ -373,33 +361,7 @@ const CatalogoProductos = () => {
   };
 
   //----------------| Plantillas |----------------
-  const plantillaImagen = (rowData) => {
-    return <img
-      // src={`https://primefaces.org/cdn/primereact/images/product/${rowData.image}`}
-      alt={rowData.image} className="shadow-2 border-round" style={{ width: '64px' }} />;
-  };
-
-  const plantillaPrecio = (rowData) => { return formatoPrecio(rowData.precioProducto) }
-  const plantillaDescuentoPrecio = (rowData) => { return formatoPrecio(rowData.precioDescuento) }
-  const plantillaPorcentaje = (rowData) => { return `${rowData.descuentoProducto} %` }
-  const plantillaCantiddad = (rowData) => { return `${rowData.cantidadInv} piezas` }
-
-  const ratingBodyTemplate = (rowData) => {
-    return <Rating value={rowData.rating} readOnly cancel={false} />;
-  };
-
-  const plantillaEstatus = (rowData) => {
-    return <Tag value={rowData.statusProducto} severity={getSeverity(rowData)}></Tag>;
-  };
-
-  const getSeverity = (product) => {
-    switch (product.statusProducto) {
-      case 'Disponible': return 'success';
-      case 'Pocos': return 'warning';
-      case 'Agotado': return 'danger';
-      default: return null;
-    }
-  };
+  const plantillaPorcentaje = (rowData) => { return `${rowData.descuentoTemporada} %` }
 
   //----------------| Botones de dialogos |----------------
   const cabezal = (
@@ -438,7 +400,6 @@ const CatalogoProductos = () => {
     <>
       <Button label="Guardar" severity="success" icon="pi pi-check" onClick={guardarRegistro} />
       <Button label="Cancelar" security="danger" icon="pi pi-times" outlined onClick={cerrarDialogoCM} />
-
     </>
   );
 
@@ -478,35 +439,23 @@ const CatalogoProductos = () => {
               globalFilter={globalFilter} header={cabezal}
             >
               <Column selectionMode="multiple" exportable={false} />
-              <Column field="nombreProducto" header="Nombre" sortable style={{ minWidth: '12rem', textAlign: "center" }} />
-              <Column field="descrProducto" header="Descripción" sortable style={{ minWidth: '12rem', textAlign: "center" }} />
-              <Column field="tipoProducto" header="Tipo" sortable style={{ minWidth: '12rem', textAlign: "center" }} />
-              <Column field="precioProducto" header="Precio" body={plantillaPrecio}
-                sortable style={{ minWidth: '12rem', textAlign: "center" }} />
-              <Column field="cantidadInv" header="Cantidad" sortable body={plantillaCantiddad}
-                style={{ minWidth: '12rem', textAlign: "center" }} />
-              <Column field="categoriaProducto" header="Categoría" sortable style={{ minWidth: '12rem', textAlign: "center" }} />
-              <Column field="descuentoProducto" header="Descuento" sortable body={plantillaPorcentaje}
-                style={{ minWidth: '12rem', textAlign: "center" }} />
-              <Column field="precioDescuento" header="Precio de descuento" sortable body={plantillaDescuentoPrecio}
-                style={{ minWidth: '12rem', textAlign: "center" }} />
-              <Column field="statusProducto" header="Estatus" sortable body={plantillaEstatus}
-                style={{ minWidth: '12rem', textAlign: "center" }} />
+              <Column field="nombreTemporada" header="Temporada" sortable style={{ minWidth: '12rem', textAlign: "center" }} />
+              <Column field="descrTemporada" header="Descripción" sortable style={{ minWidth: '12rem', textAlign: "center" }} />
+              <Column field="descuentoTemporada" header="Descuento" sortable body={plantillaPorcentaje}
+                style={{ minWidth: '12rem', textAlign: "center" }}
+              />
               <Column header="Editar" body={botonesAccion} exportable={false} style={{ minWidth: '12rem' }} />
             </DataTable>
 
             <Dialog
-              visible={productDialog} style={{ width: '32rem' }} breakpoints={{ '960px': '75vw', '641px': '90vw' }} header="Detalles del producto" modal className="p-fluid" footer={botonesCrearModificar} onHide={cerrarDialogoCM}
+              visible={productDialog}
+              header="Detalles de la temporada" modal className="p-fluid" footer={botonesCrearModificar} onHide={cerrarDialogoCM}
+              style={{ width: '32rem' }} breakpoints={{ '960px': '75vw', '641px': '90vw' }}
             >
-              {product.image && (
-                <img
-                  // src={`https://primefaces.org/cdn/primereact/images/product/${product.image}`}
-                  alt={product.image} className="product-image block m-auto pb-3" />
-              )}
               <div className="field">
-                <label htmlFor="nombre" className="font-bold">Nombre</label>
+                <label htmlFor="nombre" className="font-bold">Nombre de temporada</label>
                 <InputText
-                  id="nombre" value={product.nombreProducto} onChange={(e) => cambiarString(e, 'nombreProducto')}
+                  id="nombre" value={product.nombreTemporada} onChange={(e) => cambiarString(e, 'nombreTemporada')}
                   required autoFocus className={estiloNombre}
                 />
               </div>
@@ -515,78 +464,47 @@ const CatalogoProductos = () => {
                   <label htmlFor="nombre" className="font-bold">Nuevo nombre</label>
                   <InputText
                     id="nombre" value={nombreNuevo} onChange={(e) => setNombreNuevo(e.target.value)}
-                    required autoFocus className={classNames({ 'p-invalid': submitted && !product.nombreProducto })}
+                    required autoFocus
                   />
                 </div>
               )}
               <div className="field">
-                <label htmlFor="descripcion" className="font-bold">Descripción</label>
+                <label htmlFor="descrTemporada" className="font-bold">Descripción</label>
                 <InputText
-                  id="nombre" value={product.descrProducto} onChange={(e) => cambiarString(e, 'descrProducto')}
+                  id="nombre" value={product.descrTemporada} onChange={(e) => cambiarString(e, 'descrTemporada')}
                   required autoFocus className={estiloDescripcion}
                 />
               </div>
               <div className="formgrid grid">
                 <div className="field col">
-                  <label htmlFor="precio" className="font-bold">Precio</label>
-                  <InputNumber
-                    id="precio" value={product.precioProducto} onValueChange={(e) => cambiarNumero(e, 'precioProducto')}
-                    mode="currency" currency="USD" locale="en-US" min={0}
-                  />
-                </div>
-                <div className="field col">
-                  <label className="font-bold">Tipo de producto</label>
+                  <label htmlFor="precio" className="font-bold">Flor</label>
                   <Dropdown
-                    value={product.tipoProducto} onChange={(e) => cambiarString(e, 'tipoProducto')}
-                    options={listaTipos} optionLabel="nombre" optionValue="valor"
-                    placeholder="Elija una categoría" className={`w-full md:w-14rem ${estiloTP}`} />
+                    value={product.flores} onChange={(e) => cambiarString(e, 'flores')}
+                    options={floresDrop} optionLabel="nombreProducto" optionValue="nombreProducto"
+                    placeholder="Elija una categoría" className={`w-full md:w-14rem ${estiloFlores}`} />
+                </div>
+                <div className="field col">
+                  <label className="font-bold">Peluche</label>
+                  <Dropdown
+                    value={product.peluches} onChange={(e) => cambiarString(e, 'peluches')}
+                    options={peluchesDrop} optionLabel="nombreProducto" optionValue="nombreProducto"
+                    placeholder="Elija un peluche" className={`w-full md:w-14rem ${estiloPeluches}`} />
                 </div>
               </div>
 
-              <div className="formgrid grid">
-                <div className="field col">
-                  <label htmlFor="cantidad" className="font-bold">Cantidad</label>
-                  <InputNumber
-                    id="cantidad" value={product.cantidadInv} onValueChange={(e) => cambiarNumero(e, 'cantidadInv')}
-                    suffix=" piezas" min={0}
-                  />
-                </div>
-                <div className="field col">
-                  <label htmlFor="descuento" className="font-bold">Descuento</label>
-                  <InputNumber
-                    id="descuento" value={product.descuentoProducto} onValueChange={(e) => cambiarNumero(e, 'descuentoProducto')}
-                    suffix=" %" min={0} className={estiloDescuento}
-                  />
-                </div>
-              </div>
               <div className="field">
-                <label className="font-bold">Categoría</label>
-                <Dropdown
-                  value={product.categoriaProducto} onChange={(e) => cambiarString(e, 'categoriaProducto')}
-                  options={product.tipoProducto === 'Flor' ? listaCategoriasFlores : listaCategoriasPeluches}
-                  optionLabel="categoria" optionValue="valor"
-                  placeholder="Elija una categoría" className={`w-full ${estiloCategoria}`} />
-              </div>
-
-              <div className="flex justify-content-around">
-                <FileUpload
-                  mode="basic" name="demo[]" url="/api/upload" accept="image/*" maxFileSize={1000000} chooseLabel="Foto 1"
-                />
-                <FileUpload
-                  mode="basic" name="demo[]" url="/api/upload" accept="image/*" maxFileSize={1000000} chooseLabel="Foto 2"
-                />
-                <FileUpload
-                  mode="basic" name="demo[]" url="/api/upload" accept="image/*" maxFileSize={1000000} chooseLabel="Foto 3"
+                <label htmlFor="descuentoTemporada" className="font-bold">Descuento</label>
+                <InputNumber
+                  id="descuento" value={product.descuentoTemporada}
+                  onValueChange={(e) => cambiarNumero(e, 'descuentoTemporada')}
+                  suffix=" %" min={0} className={estiloDescuento}
                 />
               </div>
-              {/* <FileUpload mode="basic" accept="image/*" maxFileSize={1000000}
-                auto chooseLabel="Browse" /> */}
               {mensajeRespuesta && (
                 <div className="mt-4">
                   <Message severity="error" text={mensajeRespuesta} />
                 </div>
               )}
-
             </Dialog>
 
             <Dialog
@@ -598,7 +516,7 @@ const CatalogoProductos = () => {
                 <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: '2rem' }} />
                 {product && (
                   <span>
-                    ¿Está seguro de eliminar <b>{product.nombreProducto}</b>?
+                    ¿Está seguro de eliminar <b>{product.nombreTemporada}</b>?
                   </span>
                 )}
               </div>
@@ -617,4 +535,4 @@ const CatalogoProductos = () => {
   )
 }
 
-export default CatalogoProductos
+export default Temporadas

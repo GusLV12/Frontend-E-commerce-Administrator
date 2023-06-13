@@ -13,16 +13,16 @@ const AppMenu = () => {
       label: 'Modificación de Datos',
       items: [
         { label: 'Productos', icon: 'pi pi-fw pi-database', to: '/pages/catalogos/productos' },
-        { label: 'Temporadas', icon: 'pi pi-fw pi-database' },
+        { label: 'Temporadas', icon: 'pi pi-fw pi-database', to: '/pages/catalogos/temporadas' },
 
       ]
     },
     {
       label: 'Visualización de Registros',
       items: [
-        { label: 'Ordenes', icon: 'pi pi-fw pi-truck' , to: '/pages/usuario/ordenes'},
+        { label: 'Ordenes', icon: 'pi pi-fw pi-truck', to: '/pages/usuario/ordenes' },
         { label: 'Cancelaciones', icon: 'pi pi-fw pi-times-circle', to: '/pages/usuario/cancelaciones' },
-        { label: 'Devoluciones', icon: 'pi pi-fw pi-comments', to: '/pages/usuario/devoluciones'  },
+        { label: 'Devoluciones', icon: 'pi pi-fw pi-comments', to: '/pages/usuario/devoluciones' },
       ]
     }
   ];

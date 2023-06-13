@@ -1,7 +1,7 @@
 //-------------------------| Mensajes de campos incorrectos |-------------------------
 //--> Formulario
 export const campoVacio = "Campo obligatorio."
-export const emailInvalido = "Correo invalido."
+export const emailInvalido = "Correo inválido."
 export const passwordInvalido = "Contraseña demasiado corta."
 export const camposVacios = "Todos los campos son obligatorios."
 export const passwordsInValidas = "Las contraseñas no coinciden."
@@ -15,7 +15,7 @@ export const exitoResetPassword = "La contraseña ha sido cambiada."
 //--> Token
 export const tokenInvalido = "Token inválido."
 export const tokenExpirado = 'El código de verificación ha expirado.'
-export const longiudTokenInvalida = "Longitud del token invalida."
+export const longiudTokenInvalida = "Longitud del token inválida."
 export const exitoToken = "Token correcto."
 
 
@@ -44,7 +44,7 @@ export const precioInvalido = 'Formato de precio inválido.'
 export const direccionInvalido = 'Campos de dirección inválidos.'
 export const nombreInvalido = 'Formato del nombre inválido.'
 export const descripcionInvalida = 'Formato de la descripción inválida.'
-export const descuendoInvalido = 'Número de descuento invalido.'
+export const descuendoInvalido = 'Número de descuento inválido.'
 
 //--> Validando
 export const validandoPedido = 'Validando pedido.'
@@ -56,7 +56,7 @@ export const carritoadd = 'Se añadió al carrito.'
 export const carritoVacio = 'Carrito vacío.'
 
 //--> Admin
-export const errorSelectProducto = 'Seleccione al menos un producto del catalogo.'
+export const errorSelectProducto = 'Seleccione al menos un producto del catálogo.'
 export const imgFaltante = 'Imágenes faltantes.'
 
 
