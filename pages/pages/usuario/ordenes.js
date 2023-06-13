@@ -39,7 +39,7 @@ const Ordenes = () => {
    const [displayDialog, setDisplayDialog] = useState(false);
    const [pedidoStatus, setPedidoStatus] = useState('');
    const [estatusOptions, setEstatusOptions] = useState([
-     { label: 'Pendiente', value: 'Pendiente' },
+     { label: 'En preparación', value: 'En preparación' },
      { label: 'En camino', value: 'En camino' },
      { label: 'Entregado', value: 'Entregado' }
    ]);
@@ -60,7 +60,7 @@ const Ordenes = () => {
        estadoOrden: 'Entregado', direccionCliente: 'Av. Miguel Hidalgo', Total: 1895},
       
        { idOrden: 11655, idCliente: 1545, nomCliente:'Miguel Ontiveros' , fechaRecepcion: "20-06-2023", 
-      productos: [{nombre: 'Chimmy peluche', cantidad: '1'}],  estadoOrden: 'Pendiente', direccionCliente: 'Av. Rosales', Total: 256},
+      productos: [{nombre: 'Chimmy peluche', cantidad: '1'}],  estadoOrden: 'En preparación', direccionCliente: 'Av. Rosales', Total: 256},
       
       { idOrden: 1215, idCliente: 1155, nomCliente:'Paulina Flores' , fechaRecepcion: "25-08-2023", 
       productos: [{nombre: 'Cooky con hoddie', cantidad: '5'},{nombre: 'Flores rosas', cantidad: '1'},{nombre: 'Arreglo personalizado', cantidad: ''}],  estadoOrden: 'En camino', direccionCliente: 'Av. Sueños', Total: 3561},
@@ -72,7 +72,7 @@ const Ordenes = () => {
     switch (order.estadoOrden) {
       case 'Entregado': return 'success';
       case 'En camino': return 'warning';
-      case 'Pendiente': return 'danger';
+      case 'En preparación': return 'danger';
       default: return null;
     }
   };
@@ -295,7 +295,7 @@ const Ordenes = () => {
                 <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: '2rem' }} />
                 {order && (
                   <span>
-                    ¿Está seguro de eliminar el resgitro?
+                    ¿Está seguro de eliminar el registro?
                   </span>
                 )}
               </div>
