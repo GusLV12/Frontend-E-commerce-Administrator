@@ -98,7 +98,7 @@ const Cancelaciones = () => {
   //----------------| Botones de dialogos |----------------
   const cabezal = (
     <div className="flex flex-wrap gap-2 align-items-center justify-content-between">
-      <h4 className="m-0">Resgitro de Cancelaciones</h4>
+      <h4 className="m-0">Registro de Cancelaciones</h4>
       <span className="p-input-icon-left">
         <i className="pi pi-search" />
         <InputText type="search" onInput={(e) => setGlobalFilter(e.target.value)} placeholder="Buscar..." />
@@ -181,7 +181,7 @@ const Cancelaciones = () => {
                 <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: '2rem' }} />
                 {order && (
                   <span>
-                    ¿Está seguro de eliminar el resgitro?
+                    ¿Está seguro de eliminar el registro?
                   </span>
                 )}
               </div>
