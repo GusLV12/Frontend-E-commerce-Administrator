@@ -93,46 +93,7 @@ const AppConfig = (props) => {
 
         <h5>Estilos de diseño</h5>
         <div className="grid">
-          {/* <div className="col-3">
-            <button className="p-link w-2rem h-2rem" onClick={() => changeTheme('saga-blue', 'light')}>
-              <img src="/layout/images/themes/saga-blue.png" className="w-2rem h-2rem" alt="Saga Blue" />
-            </button>
-          </div>
-          <div className="col-3">
-            <button className="p-link w-2rem h-2rem" onClick={() => changeTheme('saga-green', 'light')}>
-              <img src="/layout/images/themes/saga-green.png" className="w-2rem h-2rem" alt="Saga Green" />
-            </button>
-          </div>
-          <div className="col-3">
-            <button className="p-link w-2rem h-2rem" onClick={() => changeTheme('saga-orange', 'light')}>
-              <img src="/layout/images/themes/saga-orange.png" className="w-2rem h-2rem" alt="Saga Orange" />
-            </button>
-          </div>
-          <div className="col-3">
-            <button className="p-link w-2rem h-2rem" onClick={() => changeTheme('saga-purple', 'light')}>
-              <img src="/layout/images/themes/saga-purple.png" className="w-2rem h-2rem" alt="Saga Purple" />
-            </button>
-          </div>
-          <div className="col-3">
-            <button className="p-link w-2rem h-2rem" onClick={() => changeTheme('arya-blue', 'dark')}>
-              <img src="/layout/images/themes/arya-blue.png" className="w-2rem h-2rem" alt="Arya Blue" />
-            </button>
-          </div>
-          <div className="col-3">
-            <button className="p-link w-2rem h-2rem" onClick={() => changeTheme('arya-green', 'dark')}>
-              <img src="/layout/images/themes/arya-green.png" className="w-2rem h-2rem" alt="Arya Green" />
-            </button>
-          </div>
-          <div className="col-3">
-            <button className="p-link w-2rem h-2rem" onClick={() => changeTheme('arya-orange', 'dark')}>
-              <img src="/layout/images/themes/arya-orange.png" className="w-2rem h-2rem" alt="Arya Orange" />
-            </button>
-          </div>
-          <div className="col-3">
-            <button className="p-link w-2rem h-2rem" onClick={() => changeTheme('arya-purple', 'dark')}>
-              <img src="/layout/images/themes/arya-purple.png" className="w-2rem h-2rem" alt="Arya Purple" />
-            </button>
-          </div> */}
+          
 
           {/* Temas claros */}
           <div className="col-3">
