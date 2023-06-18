@@ -5,7 +5,6 @@ import axios from "axios";
 import { Tag } from 'primereact/tag';
 import { classNames } from 'primereact/utils';
 import { Button } from 'primereact/button';
-import { FileUpload } from 'primereact/fileupload';
 import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
 import { InputNumber } from 'primereact/inputnumber';
@@ -16,6 +15,9 @@ import { Toolbar } from 'primereact/toolbar';
 import { Dropdown } from 'primereact/dropdown';
 import { Message } from 'primereact/message';
 
+//--> Funcion cloudinary
+import { Image } from 'cloudinary-react'
+
 //--> Funciones propias
 import { objetoVacio } from "@/components/catalogos/objetovacio";
 import { formatoPrecio } from "@/helpers/funciones";
@@ -24,6 +26,7 @@ import { listaTipos } from "@/components/catalogos/listas";
 import { consultarProductos, editarProducto, eliminarProducto, nuevoProducto } from "@/helpers/constantes/links";
 import { alfaNumericoEspacios, descuento } from "@/helpers/constantes/expresionesregulares";
 import { categoriaFlores, categoriaPeluches } from "@/helpers/dropproductos";
+import Cargando from "@/components/loader/cargando";
 
 const CatalogoProductos = () => {
   // --> Estructura de objetos
@@ -51,17 +54,21 @@ const CatalogoProductos = () => {
   const [estiloTP, setEstiloTP] = useState('')
   const [estiloDescuento, setEstiloDescuento] = useState('')
   const [estiloCategoria, setEstiloCategoria] = useState('')
-  // const [estiloNuevoNombre, setEstiloNuevoNombre] = useState('')
   //--> Otros
   const [editar, setEditar] = useState(false)
   const [selectedProducts, setSelectedProducts] = useState(null);
   const [submitted, setSubmitted] = useState(false);
   const [globalFilter, setGlobalFilter] = useState(null);
+  const [cargando, setCargando] = useState(false)
   //--> Mensajes
   const [mensajeRespuesta, setMensajeRespuesta] = useState('')
   //--> Especiales
   const toast = useRef(null);
   const dt = useRef(null);
+
+  const [imagen1, setImagen1] = useState('')
+  const [imagen2, setImagen2] = useState('')
+  const [imagen3, setImagen3] = useState('')
 
   //----------------| Interaccion con back-end |----------------
   //--> GET
@@ -76,9 +83,14 @@ const CatalogoProductos = () => {
 
   //--> POST
   const crearProducto = async (productoNuevo) => {
+    //--> Arreglo de strings con las imagenes
+    let imagenes = [imagen1, imagen2, imagen3]
+
+    //--> Agregar imagenes al objeto
+    productoNuevo.imagenes = imagenes
     console.log("Creando producto...")
     //--> Validar campos llenos
-    if (Object.values(productoNuevo).includes('')) {
+    if (Object.values(productoNuevo).includes('') || [imagen1, imagen2, imagen3].includes('')) {
       if (!productoNuevo.nombreProducto) setEstiloNombre('p-invalid')
       if (!productoNuevo.descrProducto) setEstiloDescripcion('p-invalid')
       if (!productoNuevo.tipoProducto) setEstiloTP('p-invalid')
@@ -131,20 +143,20 @@ const CatalogoProductos = () => {
       }
     }
     try {
+      setCargando(true)
       const respuesta = await axios.post(nuevoProducto, productoNuevo, cabecera)
-      setTimeout(() => {
-        obtenerProductos()
-        toast.current.show({
-          severity: 'success', summary: `${respuesta.data.msg}`, life: 3000
-        });
-      }, 6000);
-
+      toast.current.show({
+        severity: 'success', summary: `${respuesta.data.msg}`, life: 3000
+      });
+      obtenerProductos()
       cerrarDialogoCM()
       setProduct(productoVacio)
     } catch (error) {
       console.log(error.response.data)
       setMensajeRespuesta(error.response.data)
       setTimeout(() => { setMensajeRespuesta('') }, 3000);
+    } finally {
+      setCargando(false)
     }
   }
 
@@ -290,6 +302,9 @@ const CatalogoProductos = () => {
     setEstiloDescuento('')
     setEstiloCategoria('')
     setEstiloTP('')
+    setImagen1('')
+    setImagen2('')
+    setImagen3('')
   };
 
   const cerrarDialogoCM = () => { setProductDialog(false) };
@@ -308,6 +323,7 @@ const CatalogoProductos = () => {
   };
 
   const editarRegistro = (product) => {
+    console.log(product)
     setProduct({ ...product });
     setProductDialog(true);
   };
@@ -350,14 +366,6 @@ const CatalogoProductos = () => {
     });
   };
 
-  //----------------| Funciones para editar |----------------
-  // const cambiarEstatus = (e) => {
-  //   let _product = { ...product };
-
-  //   _product['estatus'] = e.value;
-  //   setProduct(_product);
-  // };
-
   const cambiarString = (e, name) => {
     const val = (e.target && e.target.value) || '';
     let _product = { ...product };
@@ -374,9 +382,12 @@ const CatalogoProductos = () => {
 
   //----------------| Plantillas |----------------
   const plantillaImagen = (rowData) => {
-    return <img
-      // src={`https://primefaces.org/cdn/primereact/images/product/${rowData.image}`}
-      alt={rowData.image} className="shadow-2 border-round" style={{ width: '64px' }} />;
+    return <Image
+      cloudName="dp6uo7fsz" publicId={rowData.imagenProducto[0]}
+      className="w-9 sm:w-16rem xl:w-10rem shadow-2 block xl:block mx-auto border-round"
+      style={{ width: '50px', height: '80px' }}
+    />
+
   };
 
   const plantillaPrecio = (rowData) => { return formatoPrecio(rowData.precioProducto) }
@@ -480,6 +491,7 @@ const CatalogoProductos = () => {
               <Column selectionMode="multiple" exportable={false} />
               <Column field="nombreProducto" header="Nombre" sortable style={{ minWidth: '12rem', textAlign: "center" }} />
               <Column field="descrProducto" header="Descripción" sortable style={{ minWidth: '12rem', textAlign: "center" }} />
+              <Column field="imagenProducto" header="Imagen" sortable style={{ minWidth: '12rem', textAlign: "center" }} body={plantillaImagen} />
               <Column field="tipoProducto" header="Tipo" sortable style={{ minWidth: '12rem', textAlign: "center" }} />
               <Column field="precioProducto" header="Precio" body={plantillaPrecio}
                 sortable style={{ minWidth: '12rem', textAlign: "center" }} />
@@ -496,95 +508,95 @@ const CatalogoProductos = () => {
             </DataTable>
 
             <Dialog
-              visible={productDialog} style={{ width: '32rem' }} breakpoints={{ '960px': '75vw', '641px': '90vw' }} header="Detalles del producto" modal className="p-fluid" footer={botonesCrearModificar} onHide={cerrarDialogoCM}
+              visible={productDialog} style={{ width: '32rem' }} breakpoints={{ '960px': '75vw', '641px': '90vw' }}
+              header="Detalles del producto" modal className="p-fluid" footer={!cargando && botonesCrearModificar}
+              onHide={cerrarDialogoCM}
             >
               {product.image && (
                 <img
                   // src={`https://primefaces.org/cdn/primereact/images/product/${product.image}`}
                   alt={product.image} className="product-image block m-auto pb-3" />
               )}
-              <div className="field">
-                <label htmlFor="nombre" className="font-bold">Nombre</label>
-                <InputText
-                  id="nombre" value={product.nombreProducto} onChange={(e) => cambiarString(e, 'nombreProducto')}
-                  required autoFocus className={estiloNombre}
-                />
-              </div>
-              {editar && (
-                <div className="field">
-                  <label htmlFor="nombre" className="font-bold">Nuevo nombre</label>
-                  <InputText
-                    id="nombre" value={nombreNuevo} onChange={(e) => setNombreNuevo(e.target.value)}
-                    required autoFocus className={classNames({ 'p-invalid': submitted && !product.nombreProducto })}
-                  />
-                </div>
-              )}
-              <div className="field">
-                <label htmlFor="descripcion" className="font-bold">Descripción</label>
-                <InputText
-                  id="nombre" value={product.descrProducto} onChange={(e) => cambiarString(e, 'descrProducto')}
-                  required autoFocus className={estiloDescripcion}
-                />
-              </div>
-              <div className="formgrid grid">
-                <div className="field col">
-                  <label htmlFor="precio" className="font-bold">Precio</label>
-                  <InputNumber
-                    id="precio" value={product.precioProducto} onValueChange={(e) => cambiarNumero(e, 'precioProducto')}
-                    mode="currency" currency="USD" locale="en-US" min={0}
-                  />
-                </div>
-                <div className="field col">
-                  <label className="font-bold">Tipo de producto</label>
-                  <Dropdown
-                    value={product.tipoProducto} onChange={(e) => cambiarString(e, 'tipoProducto')}
-                    options={listaTipos} optionLabel="nombre" optionValue="valor"
-                    placeholder="Elija una categoría" className={`w-full md:w-14rem ${estiloTP}`} />
-                </div>
-              </div>
+              {cargando && <Cargando />}
+              {!cargando && (
+                <>
+                  <div className="field">
+                    <label htmlFor="nombre" className="font-bold">Nombre</label>
+                    <InputText
+                      id="nombre" value={product.nombreProducto} onChange={(e) => cambiarString(e, 'nombreProducto')}
+                      required autoFocus className={estiloNombre}
+                    />
+                  </div>
+                  {editar && (
+                    <div className="field">
+                      <label htmlFor="nombre" className="font-bold">Nuevo nombre</label>
+                      <InputText
+                        id="nombre" value={nombreNuevo} onChange={(e) => setNombreNuevo(e.target.value)}
+                        required autoFocus className={classNames({ 'p-invalid': submitted && !product.nombreProducto })}
+                      />
+                    </div>
+                  )}
+                  <div className="field">
+                    <label htmlFor="descripcion" className="font-bold">Descripción</label>
+                    <InputText
+                      id="nombre" value={product.descrProducto} onChange={(e) => cambiarString(e, 'descrProducto')}
+                      required autoFocus className={estiloDescripcion}
+                    />
+                  </div>
+                  <div className="formgrid grid">
+                    <div className="field col">
+                      <label htmlFor="precio" className="font-bold">Precio</label>
+                      <InputNumber
+                        id="precio" value={product.precioProducto} onValueChange={(e) => cambiarNumero(e, 'precioProducto')}
+                        mode="currency" currency="USD" locale="en-US" min={0}
+                      />
+                    </div>
+                    <div className="field col">
+                      <label className="font-bold">Tipo de producto</label>
+                      <Dropdown
+                        value={product.tipoProducto} onChange={(e) => cambiarString(e, 'tipoProducto')}
+                        options={listaTipos} optionLabel="nombre" optionValue="valor"
+                        placeholder="Elija una categoría" className={`w-full md:w-14rem ${estiloTP}`} />
+                    </div>
+                  </div>
 
-              <div className="formgrid grid">
-                <div className="field col">
-                  <label htmlFor="cantidad" className="font-bold">Cantidad</label>
-                  <InputNumber
-                    id="cantidad" value={product.cantidadInv} onValueChange={(e) => cambiarNumero(e, 'cantidadInv')}
-                    suffix=" piezas" min={0}
-                  />
-                </div>
-                <div className="field col">
-                  <label htmlFor="descuento" className="font-bold">Descuento</label>
-                  <InputNumber
-                    id="descuento" value={product.descuentoProducto} onValueChange={(e) => cambiarNumero(e, 'descuentoProducto')}
-                    suffix=" %" min={0} className={estiloDescuento}
-                  />
-                </div>
-              </div>
-              <div className="field">
-                <label className="font-bold">Categoría</label>
-                <Dropdown
-                  value={product.categoriaProducto} onChange={(e) => cambiarString(e, 'categoriaProducto')}
-                  options={product.tipoProducto === 'Flor' ? listaCategoriasFlores : listaCategoriasPeluches}
-                  optionLabel="categoria" optionValue="valor"
-                  placeholder="Elija una categoría" className={`w-full ${estiloCategoria}`} />
-              </div>
+                  <div className="formgrid grid">
+                    <div className="field col">
+                      <label htmlFor="cantidad" className="font-bold">Cantidad</label>
+                      <InputNumber
+                        id="cantidad" value={product.cantidadInv} onValueChange={(e) => cambiarNumero(e, 'cantidadInv')}
+                        suffix=" piezas" min={0}
+                      />
+                    </div>
+                    <div className="field col">
+                      <label htmlFor="descuento" className="font-bold">Descuento</label>
+                      <InputNumber
+                        id="descuento" value={product.descuentoProducto} onValueChange={(e) => cambiarNumero(e, 'descuentoProducto')}
+                        suffix=" %" min={0} className={estiloDescuento}
+                      />
+                    </div>
+                  </div>
+                  <div className="field">
+                    <label className="font-bold">Categoría</label>
+                    <Dropdown
+                      value={product.categoriaProducto} onChange={(e) => cambiarString(e, 'categoriaProducto')}
+                      options={product.tipoProducto === 'Flor' ? listaCategoriasFlores : listaCategoriasPeluches}
+                      optionLabel="categoria" optionValue="valor"
+                      placeholder="Elija una categoría" className={`w-full ${estiloCategoria}`} />
+                  </div>
 
-              <div className="flex justify-content-around">
-                <FileUpload
-                  mode="basic" name="demo[]" url="/api/upload" accept="image/*" maxFileSize={1000000} chooseLabel="Foto 1"
-                />
-                <FileUpload
-                  mode="basic" name="demo[]" url="/api/upload" accept="image/*" maxFileSize={1000000} chooseLabel="Foto 2"
-                />
-                <FileUpload
-                  mode="basic" name="demo[]" url="/api/upload" accept="image/*" maxFileSize={1000000} chooseLabel="Foto 3"
-                />
-              </div>
-              {/* <FileUpload mode="basic" accept="image/*" maxFileSize={1000000}
-                auto chooseLabel="Browse" /> */}
-              {mensajeRespuesta && (
-                <div className="mt-4">
-                  <Message severity="error" text={mensajeRespuesta} />
-                </div>
+                  <div className="field">
+                    <label htmlFor="imagenes" className="font-bold">Imágenes</label>
+                    <InputText placeholder="Imagen 1" value={imagen1} onChange={(e) => setImagen1(e.target.value)} />
+                    <InputText placeholder="Imagen 2" value={imagen2} onChange={(e) => setImagen2(e.target.value)} />
+                    <InputText placeholder="Imagen 3" value={imagen3} onChange={(e) => setImagen3(e.target.value)} />
+                  </div>
+                  {mensajeRespuesta && (
+                    <div className="mt-4">
+                      <Message severity="error" text={mensajeRespuesta} />
+                    </div>
+                  )}
+                </>
               )}
 
             </Dialog>

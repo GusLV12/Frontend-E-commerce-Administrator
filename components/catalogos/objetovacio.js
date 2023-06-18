@@ -6,11 +6,7 @@ export let objetoVacio = {
   categoriaProducto: '',
   cantidadInv: 0,
   descuentoProducto: 0,
-  imagenes: [
-    "C:/Users/uriel/OneDrive/Escritorio/Uriel/Whoami/Multimedia/Imagenes/cubo.jpg",
-    "C:/Users/uriel/OneDrive/Escritorio/Uriel/Whoami/Multimedia/Imagenes/cubo.jpg",
-    "C:/Users/uriel/OneDrive/Escritorio/Uriel/Whoami/Multimedia/Imagenes/cubo.jpg"
-  ]
+  imagenes: []
 }
 
 export let temporadaVacia = {
