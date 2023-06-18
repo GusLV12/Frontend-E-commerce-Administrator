@@ -70,6 +70,8 @@ const CatalogoProductos = () => {
   const [imagen2, setImagen2] = useState('')
   const [imagen3, setImagen3] = useState('')
 
+  const [imagenesEliminar, setImagenesEliminar] = useState('')
+
   //----------------| Interaccion con back-end |----------------
   //--> GET
   const obtenerProductos = async () => {
@@ -163,6 +165,17 @@ const CatalogoProductos = () => {
   //--> PUT
   const actualizarProducto = async (productoEditar) => {
     console.log("Actualizando...")
+    //--> Arreglo de strings con las imagenes
+    let imagenes = [imagen1, imagen2, imagen3]
+    //--> Lista de imagenes a eliminar
+    let listaImagenesEliminar
+    if (imagenesEliminar) listaImagenesEliminar = imagenesEliminar.split(',')
+    else listaImagenesEliminar = []
+    // else console.log("No tiene imagenes a eliminar")
+    // console.log(imagenesEliminar)
+    // if (imagenesEliminar.length > 0) 
+    // let listaImagenesEliminar = imagenesEliminar.split(',')
+
     // console.log(productoEditar)
     //--> Validar campos llenos
     if (Object.values(productoEditar).includes('') || nombreNuevo === '') {
@@ -226,11 +239,14 @@ const CatalogoProductos = () => {
       descuentoProducto: product.descuentoProducto,
       cantidadInv: product.cantidadInv,
       categoriaProducto: product.categoriaProducto,
-      imagenesAdd: [],
-      imagenesRem: []
+      imagenesAdd: imagenes,
+      imagenesRem: listaImagenesEliminar
+      // imagenesRem: []
     }
+
     //--> Mandar objeto al back-end
     try {
+      setCargando(true)
       const respuesta = await axios.post(editarProducto, objetoEnviar, cabecera)
       toast.current.show({
         severity: 'success', summary: `${respuesta.data.msg}`, life: 3000
@@ -244,9 +260,11 @@ const CatalogoProductos = () => {
       //--> Renderizar despues de enviar
       obtenerProductos()
     } catch (error) {
-      console.log(error.response.data)
-      setMensajeRespuesta(error.response.data)
+      console.log(error.response?.data)
+      setMensajeRespuesta(error.response?.data)
       setTimeout(() => { setMensajeRespuesta('') }, 3000);
+    } finally {
+      setCargando(false)
     }
   }
 
@@ -305,6 +323,7 @@ const CatalogoProductos = () => {
     setImagen1('')
     setImagen2('')
     setImagen3('')
+    setImagenesEliminar('')
   };
 
   const cerrarDialogoCM = () => { setProductDialog(false) };
@@ -323,9 +342,14 @@ const CatalogoProductos = () => {
   };
 
   const editarRegistro = (product) => {
-    console.log(product)
+    // console.log(product)
     setProduct({ ...product });
     setProductDialog(true);
+    //--> Campos adicionales
+    setImagen1('')
+    setImagen2('')
+    setImagen3('')
+    setImagenesEliminar('')
   };
 
   const confirmarEliminarRegistro = (product) => {
@@ -591,6 +615,13 @@ const CatalogoProductos = () => {
                     <InputText placeholder="Imagen 2" value={imagen2} onChange={(e) => setImagen2(e.target.value)} />
                     <InputText placeholder="Imagen 3" value={imagen3} onChange={(e) => setImagen3(e.target.value)} />
                   </div>
+                  {product._id && (
+                    <div className="field">
+                      <label htmlFor="eliminar" className="font-bold">Imagenes a eliminar</label>
+                      <InputText value={imagenesEliminar} onChange={(e) => setImagenesEliminar(e.target.value)} />
+                    </div>
+                  )}
+
                   {mensajeRespuesta && (
                     <div className="mt-4">
                       <Message severity="error" text={mensajeRespuesta} />
