@@ -2,10 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import Layout from "@/layout/layout"
 import axios from "axios";
 //--> Componentes primeReact
-import { Tag } from 'primereact/tag';
-import { classNames } from 'primereact/utils';
 import { Button } from 'primereact/button';
-import { FileUpload } from 'primereact/fileupload';
 import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
 import { InputNumber } from 'primereact/inputnumber';
@@ -13,32 +10,35 @@ import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
-import { Dropdown } from 'primereact/dropdown';
+// import { Dropdown } from 'primereact/dropdown';
+import { MultiSelect } from 'primereact/multiselect';
+import { Calendar } from 'primereact/calendar';
 import { Message } from 'primereact/message';
 
 //--> Funciones propias
 import { temporadaVacia } from "@/components/catalogos/objetovacio";
-import { formatoPrecio } from "@/helpers/funciones";
-import { camposVacios, descripcionInvalida, descuendoInvalido, nombreInvalido } from "@/helpers/constantes/mensajes";
-import { listaTipos } from "@/components/catalogos/listas";
-import { eliminarTemporada, listaFlores, listaPeluches, modificarTemporada, nuevaTemporada, verTemporadas } from "@/helpers/constantes/links";
-import { alfaNumericoEspacios, descuento } from "@/helpers/constantes/expresionesregulares";
-import { categoriaFlores, categoriaPeluches } from "@/helpers/dropproductos";
+import { formatearFecha } from "@/helpers/funciones";
+import { camposVacios, descripcionInvalida, descuendoInvalido, fechaInvalida, fechasInvalidas, nombreInvalido } from "@/helpers/constantes/mensajes";
+import {
+  eliminarTemporada, listaFlores, listaPeluches, modificarTemporada, nuevaTemporada, verTemporadas
+} from "@/helpers/constantes/links";
+import { alfaNumericoEspacios, descuento, fecha } from "@/helpers/constantes/expresionesregulares";
 
 const Temporadas = () => {
   // --> Estructura de objetos
   let productoVacio = temporadaVacia
-  const listaCategoriasFlores = categoriaFlores
-  const listaCategoriasPeluches = categoriaPeluches
 
-  // --> Validar cualquier string 
+  // --> Validar con expresiones regulares 
   const validarString = alfaNumericoEspacios
   const validarDescuento = descuento
+  const validarFecha = fecha
 
   //----------------| Lista de variables |----------------
   //--> Registros
   const [product, setProduct] = useState(productoVacio);
   const [products, setProducts] = useState(null);
+  const [flores, setFlores] = useState([])
+  const [peluches, setPeluches] = useState([])
   //--> Lista de dropdowns
   const [floresDrop, setFloresDrop] = useState([]);
   const [peluchesDrop, setPeluchesDrop] = useState([]);
@@ -54,6 +54,8 @@ const Temporadas = () => {
   const [estiloPeluches, setEstiloPeluches] = useState('')
   const [estiloDescuento, setEstiloDescuento] = useState('')
   const [estiloFlores, setEstiloFlores] = useState('')
+  const [estiloFechaInicio, setEstiloFechaInicio] = useState('')
+  const [estiloFechaFin, setEstiloFechaFin] = useState('')
   //--> Otros
   const [editar, setEditar] = useState(false)
   const [selectedProducts, setSelectedProducts] = useState(null);
@@ -67,7 +69,7 @@ const Temporadas = () => {
   //----------------| Interaccion con back-end |----------------
   //--> GET
   const obtenerProductos = async () => {
-    console.log("Obteniendo productos...")
+    console.log("Obteniendo temporadas...")
     try {
       const datos = await axios.get(verTemporadas)
       // console.log(datos.data.seasons)
@@ -77,13 +79,22 @@ const Temporadas = () => {
 
   //--> POST
   const crearProducto = async (productoNuevo) => {
-    console.log("Creando producto...")
+    console.log("Creando temporada...")
+    //--> asignar valores de flores y peluches
+    productoNuevo.flores = flores
+    productoNuevo.peluches = peluches
     //--> Validar campos llenos
-    if (Object.values(productoNuevo).includes('')) {
+    if (
+      Object.values(productoNuevo).includes('') ||
+      Object.values(productoNuevo).includes(null) ||
+      flores.length === 0 || peluches.length === 0
+    ) {
       if (!productoNuevo.nombreTemporada) setEstiloNombre('p-invalid')
       if (!productoNuevo.descrTemporada) setEstiloDescripcion('p-invalid')
-      if (!productoNuevo.peluches) setEstiloPeluches('p-invalid')
-      if (!productoNuevo.flores) setEstiloFlores('p-invalid')
+      if (productoNuevo.peluches.length === 0) setEstiloPeluches('p-invalid')
+      if (productoNuevo.flores.length === 0) setEstiloFlores('p-invalid')
+      if (!productoNuevo.fecInit) setEstiloFechaInicio('p-invalid')
+      if (!productoNuevo.fecEnd) setEstiloFechaFin('p-invalid')
       setMensajeRespuesta(camposVacios)
       setTimeout(() => { setMensajeRespuesta('') }, 3000)
       return
@@ -92,6 +103,9 @@ const Temporadas = () => {
       setEstiloDescripcion('')
       setEstiloPeluches('')
       setEstiloFlores('')
+      setEstiloFechaInicio('')
+      setEstiloFechaFin('')
+      setMensajeRespuesta('')
     }
     //--> Validar Nombre
     if (!validarString.test(productoNuevo.nombreTemporada)) {
@@ -121,6 +135,18 @@ const Temporadas = () => {
       return
     } else {
       setEstiloDescuento('')
+      setMensajeRespuesta('')
+    }
+    //--> Comparar fechas
+    if (productoNuevo.fecInit > productoNuevo.fecEnd) {
+      setEstiloFechaInicio('p-invalid')
+      setEstiloFechaFin('p-invalid')
+      setMensajeRespuesta(fechasInvalidas)
+      setTimeout(() => { setMensajeRespuesta('') }, 3000)
+      return
+    } else {
+      setEstiloFechaInicio('')
+      setEstiloFechaFin('')
       setMensajeRespuesta('')
     }
 
@@ -231,7 +257,7 @@ const Temporadas = () => {
   //--> DELETE
   const quitarProducto = async () => {
     console.log("Eliminando producto...")
-    console.log(product)
+    // console.log(product)
     //--> Crear objeto a eliminar
     const objetoEliminar = { nombreTemporada: product.nombreTemporada }
     const token = localStorage.getItem('token')
@@ -276,8 +302,12 @@ const Temporadas = () => {
 
   //----------------| Interaccion con dialogos |----------------
   const abrirDialogoCM = () => {
+    //--> Limpiar campos
     setProduct(productoVacio);
     setNombreNuevo('')
+    setFlores([])
+    setPeluches([])
+
     setProductDialog(true);
     //--> Estilos
     setEstiloNombre('')
@@ -285,6 +315,8 @@ const Temporadas = () => {
     setEstiloDescuento('')
     setEstiloFlores('')
     setEstiloPeluches('')
+    setEstiloFechaInicio('')
+    setEstiloFechaFin('')
   };
 
   const cerrarDialogoCM = () => { setProductDialog(false) };
@@ -303,7 +335,13 @@ const Temporadas = () => {
   };
 
   const editarRegistro = (product) => {
-    setProduct({ ...product });
+    setNombreNuevo('')
+    console.log(product)
+    //--> Fechas
+    const fechaInicio = new Date(product.fecInit)
+    const fechaFin = new Date(product.fecEnd)
+    //--> Setear campos
+    setProduct({ ...product, fecInit: fechaInicio, fecEnd: fechaFin });
     setProductDialog(true);
   };
 
@@ -362,6 +400,8 @@ const Temporadas = () => {
 
   //----------------| Plantillas |----------------
   const plantillaPorcentaje = (rowData) => { return `${rowData.descuentoTemporada} %` }
+  const plantillaFechaInicio = (rowData) => { return formatearFecha(rowData.fecInit) }
+  const plantillaFechaFin = (rowData) => { return formatearFecha(rowData.fecEnd) }
 
   //----------------| Botones de dialogos |----------------
   const cabezal = (
@@ -441,8 +481,17 @@ const Temporadas = () => {
               <Column selectionMode="multiple" exportable={false} />
               <Column field="nombreTemporada" header="Temporada" sortable style={{ minWidth: '12rem', textAlign: "center" }} />
               <Column field="descrTemporada" header="Descripción" sortable style={{ minWidth: '12rem', textAlign: "center" }} />
-              <Column field="descuentoTemporada" header="Descuento" sortable body={plantillaPorcentaje}
+              <Column
+                field="descuentoTemporada" header="Descuento" sortable body={plantillaPorcentaje}
                 style={{ minWidth: '12rem', textAlign: "center" }}
+              />
+              <Column
+                field="fecInit" header="Fecha Inicio" sortable style={{ minWidth: '12rem', textAlign: "center" }}
+                body={plantillaFechaInicio}
+              />
+              <Column
+                field="fecEnd" header="Fecha Fin" sortable style={{ minWidth: '12rem', textAlign: "center" }}
+                body={plantillaFechaFin}
               />
               <Column header="Editar" body={botonesAccion} exportable={false} style={{ minWidth: '12rem' }} />
             </DataTable>
@@ -450,7 +499,7 @@ const Temporadas = () => {
             <Dialog
               visible={productDialog}
               header="Detalles de la temporada" modal className="p-fluid" footer={botonesCrearModificar} onHide={cerrarDialogoCM}
-              style={{ width: '32rem' }} breakpoints={{ '960px': '75vw', '641px': '90vw' }}
+              style={{ width: '35rem' }} breakpoints={{ '960px': '75vw', '641px': '90vw' }}
             >
               <div className="field">
                 <label htmlFor="nombre" className="font-bold">Nombre de temporada</label>
@@ -477,18 +526,18 @@ const Temporadas = () => {
               </div>
               <div className="formgrid grid">
                 <div className="field col">
-                  <label htmlFor="precio" className="font-bold">Flor</label>
-                  <Dropdown
-                    value={product.flores} onChange={(e) => cambiarString(e, 'flores')}
+                  <label className="font-bold">Flores</label>
+                  <MultiSelect
+                    value={flores} onChange={(e) => setFlores(e.value)}
                     options={floresDrop} optionLabel="nombreProducto" optionValue="nombreProducto"
-                    placeholder="Elija una categoría" className={`w-full md:w-14rem ${estiloFlores}`} />
+                    placeholder="Por lo menos una flor" className={`w-full md:w-14rem ${estiloFlores}`} />
                 </div>
                 <div className="field col">
-                  <label className="font-bold">Peluche</label>
-                  <Dropdown
-                    value={product.peluches} onChange={(e) => cambiarString(e, 'peluches')}
+                  <label className="font-bold">Peluches</label>
+                  <MultiSelect
+                    value={peluches} onChange={(e) => setPeluches(e.value)}
                     options={peluchesDrop} optionLabel="nombreProducto" optionValue="nombreProducto"
-                    placeholder="Elija un peluche" className={`w-full md:w-14rem ${estiloPeluches}`} />
+                    placeholder="Por lo menos un peluche" className={`w-full md:w-14rem ${estiloPeluches}`} />
                 </div>
               </div>
 
@@ -500,6 +549,26 @@ const Temporadas = () => {
                   suffix=" %" min={0} className={estiloDescuento}
                 />
               </div>
+              <div className="formgrid grid">
+                <div className="field col">
+                  <label htmlFor="fechaInicio" className="font-bold">Fecha inicio</label>
+                  {/* <InputText
+                    id="fechaInicio" value={product.fecInit} onChange={(e) => cambiarString(e, 'fecInit')}
+                    required autoFocus className={estiloFechaInicio}
+                  /> */}
+                  <Calendar value={product.fecInit} onChange={(e) => cambiarString(e, 'fecInit')} className={estiloFechaInicio} />
+                </div>
+                <div className="field col">
+                  <label htmlFor="fechaFin" className="font-bold">Fecha fin</label>
+                  {/* <InputText
+                    id="fechaInicio" value={product.fecEnd} onChange={(e) => cambiarString(e, 'fecEnd')}
+                    required autoFocus className={estiloFechaFin}
+                  /> */}
+                  <Calendar value={product.fecEnd} onChange={(e) => cambiarString(e, 'fecEnd')} className={estiloFechaFin} />
+                </div>
+              </div>
+
+
               {mensajeRespuesta && (
                 <div className="mt-4">
                   <Message severity="error" text={mensajeRespuesta} />

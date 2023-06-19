@@ -7,6 +7,8 @@ export const camposVacios = "Todos los campos son obligatorios."
 export const passwordsInValidas = "Las contraseñas no coinciden."
 export const contraOlvidada = '¿Olvidaste tu contraseña?'
 export const mailcontraIncorrecto = 'Correo o contraseña incorrectos.'
+export const fechaInvalida = 'Fecha inválida.'
+export const fechasInvalidas = 'Fecha de inicio debe ser menor a la fecha final.'
 
 //--> Resetear password
 export const resetearExitoso = "Envío exitoso, revisa tu correo."

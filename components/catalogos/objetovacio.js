@@ -11,8 +11,10 @@ export let objetoVacio = {
 
 export let temporadaVacia = {
   nombreTemporada: "",
+  peluches: [],
+  flores: [],
   descrTemporada: "",
-  peluches: "",
-  flores: "",
-  descuentoTemporada: 0
+  descuentoTemporada: 0,
+  fecInit: null,
+  fecEnd: null
 }
