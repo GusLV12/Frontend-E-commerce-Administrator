@@ -173,13 +173,24 @@ const Temporadas = () => {
   //--> PUT
   const actualizarProducto = async (productoEditar) => {
     console.log("Actualizando...")
+    const objetoEnviar = {
+      nombreTemporada: product.nombreTemporada,
+      newName: nombreNuevo,
+      descrTemporada: product.descrTemporada,
+      descuentoTemporada: product.descuentoTemporada,
+      fecInit: product.fecInit,
+      fecEnd: product.fecEnd,
+      peluches: peluches,
+      flores: flores
+    }
+    console.log(objetoEnviar)
     // console.log(productoEditar)
     //--> Validar campos llenos
-    if (Object.values(productoEditar).includes('') || nombreNuevo === '') {
+    if (Object.values(productoEditar).includes('') || nombreNuevo === '' || flores.length === 0 || peluches.length === 0) {
       if (!productoEditar.nombreTemporada) setEstiloNombre('p-invalid')
       if (!productoEditar.descrTemporada) setEstiloDescripcion('p-invalid')
-      // if (!productoEditar.peluches) setEstiloPeluches('p-invalid')
-      // if (!productoEditar.flores) setEstiloFlores('p-invalid')
+      if (!productoEditar.peluches) setEstiloPeluches('p-invalid')
+      if (!productoEditar.flores) setEstiloFlores('p-invalid')
       setMensajeRespuesta(camposVacios)
       setTimeout(() => { setMensajeRespuesta('') }, 3000)
       return
@@ -226,12 +237,6 @@ const Temporadas = () => {
       headers: {
         Authorization: `Bearer ${token}`
       }
-    }
-    const objetoEnviar = {
-      nombreTemporada: product.nombreTemporada,
-      newName: nombreNuevo,
-      descrTemporada: product.descrTemporada,
-      descuentoTemporada: product.descuentoTemporada,
     }
     //--> Mandar objeto al back-end
     try {
@@ -335,8 +340,18 @@ const Temporadas = () => {
   };
 
   const editarRegistro = (product) => {
+    //--> Limpiar campos
+    setEstiloNombre('')
+    setEstiloDescripcion('')
+    setEstiloDescuento('')
+    setEstiloFlores('')
+    setEstiloPeluches('')
+    setEstiloFechaInicio('')
+    setEstiloFechaFin('')
     setNombreNuevo('')
-    console.log(product)
+    setFlores([])
+    setPeluches([])
+    // console.log(product)
     //--> Fechas
     const fechaInicio = new Date(product.fecInit)
     const fechaFin = new Date(product.fecEnd)
