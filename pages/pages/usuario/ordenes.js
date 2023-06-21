@@ -14,8 +14,10 @@ import { RadioButton } from 'primereact/radiobutton';
 import { Chip } from 'primereact/chip';
 //--> Funciones propias
 import { objetoVacio } from "@/components/catalogos/objetovacio";
-import { formatoPrecio } from "@/helpers/funciones";
+import { formatearFecha, formatoPrecio } from "@/helpers/funciones";
 import { FormatoFecha } from "@/helpers/funciones";
+import axios from "axios";
+import { consultarPedidos } from "@/helpers/constantes/links";
 
 
 const Ordenes = () => {
@@ -32,41 +34,44 @@ const Ordenes = () => {
   //--> Otros
   const [selectedOrders, setSelectedOrders] = useState(null);
   const [globalFilter, setGlobalFilter] = useState(null);
-  
+
 
   //-> Estatus Pedido
-   //---------- | Modificar Status | ------------
-   const [displayDialog, setDisplayDialog] = useState(false);
-   const [pedidoStatus, setPedidoStatus] = useState('');
-   const [estatusOptions, setEstatusOptions] = useState([
-     { label: 'En preparación', value: 'En preparación' },
-     { label: 'En camino', value: 'En camino' },
-     { label: 'Entregado', value: 'Entregado' }
-   ]);
+  //---------- | Modificar Status | ------------
+  const [displayDialog, setDisplayDialog] = useState(false);
+  const [pedidoStatus, setPedidoStatus] = useState('');
+  const [estatusOptions, setEstatusOptions] = useState([
+    { label: 'En preparación', value: 'En preparación' },
+    { label: 'En camino', value: 'En camino' },
+    { label: 'Entregado', value: 'Entregado' }
+  ]);
 
   const [mensajeRespuesta, setMensajeRespuesta] = useState('')
   //--> Especiales
   const toast = useRef(null);
   const dt = useRef(null);
 
-  //--> Cargar cuando se renderiza
-  useEffect(() => {
-    const datos = [
-      { idOrden: 115, idCliente: 145, nomCliente:'Omar Yu' , fechaRecepcion: "25-09-2023", 
-      productos: [{nombre: 'Arreglo Floral Girasoles', cantidad: 2}],  estadoOrden: 'En camino', direccionCliente: 'Av. Rosales', Total: 495},
-      
-      { idOrden: 116, idCliente: 1215, nomCliente:'Angelica Muñoz' , fechaRecepcion: "01-06-2023", 
-      productos: [{nombre: 'Arreglo Cumpleaños', cantidad: '3'},{nombre: 'Osito afelpado', cantidad: '2'}], 
-       estadoOrden: 'Entregado', direccionCliente: 'Av. Miguel Hidalgo', Total: 1895},
-      
-       { idOrden: 11655, idCliente: 1545, nomCliente:'Miguel Ontiveros' , fechaRecepcion: "20-06-2023", 
-      productos: [{nombre: 'Chimmy peluche', cantidad: '1'}],  estadoOrden: 'En preparación', direccionCliente: 'Av. Rosales', Total: 256},
-      
-      { idOrden: 1215, idCliente: 1155, nomCliente:'Paulina Flores' , fechaRecepcion: "25-08-2023", 
-      productos: [{nombre: 'Cooky con hoddie', cantidad: '5'},{nombre: 'Flores rosas', cantidad: '1'},{nombre: 'Arreglo personalizado', cantidad: ''}],  estadoOrden: 'En camino', direccionCliente: 'Av. Sueños', Total: 3561},
-    ]
-    setOrders(datos)
-  }, []);
+
+  const consultarOrdenes = async () => {
+    console.log('Consultando ordenes')
+    //--> Preparar objeto para mandar al back-end
+    const token = localStorage.getItem('token')
+    const cabecera = {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    }
+    try {
+      const respuesta = await axios.get(consultarPedidos, cabecera)
+      // const ordenes = await respuesta.json()
+      console.log(respuesta.data.pedidos)
+      setOrders(respuesta.data.pedidos)
+    } catch (error) {
+
+    }
+  }
+  //--------- |Cargar cuando se renderiza |----------
+  useEffect(() => { consultarOrdenes() }, [])
 
   const getSeverity = (order) => {
     switch (order.estadoOrden) {
@@ -78,21 +83,21 @@ const Ordenes = () => {
   };
 
   // --------- |Mostrar productos |----------
-  const plantillaProductos = (rowData) => {
-    return (
-      <div>
-        {rowData.productos.map((producto, index) => (
-          <Chip
-            key={index}
-            label={`Producto: ${producto.nombre} Cantidad: (${producto.cantidad})`}
-            className="p-mr-2"
-          />
-        ))}
-      </div>
-    );
-    }
+  // const plantillaProductos = (rowData) => {
+  //   return (
+  //     <div>
+  //       {rowData.productos.map((producto, index) => (
+  //         <Chip
+  //           key={index}
+  //           label={`Producto: ${producto.nombre} Cantidad: (${producto.cantidad})`}
+  //           className="p-mr-2"
+  //         />
+  //       ))}
+  //     </div>
+  //   );
+  // }
 
-//------------- | Dialogo Estatus |-------- 
+  //------------- | Dialogo Estatus |-------- 
 
   const handleButtonClick = () => {
     setDisplayDialog(true);
@@ -103,39 +108,41 @@ const Ordenes = () => {
   };
 
   const handleStatusChange = (e) => {
-   
-    let _orden = { ... order };
-    
-        _orden['estadoOrden'] = e.value;
-        setPedidoStatus(_orden);
+
+    let _orden = { ...order };
+
+    _orden['estadoOrden'] = e.value;
+    setPedidoStatus(_orden);
 
     toast.current.show({
       severity: 'success', summary: 'Estatus Guardado', detail: 'Se ha actualizado correctamente el estatus del pedido', life: 3000
     });
-    
-       
+
+
     setDisplayDialog(false);
   };
-  
 
- // --------- |Plantillas| -------------
 
-  const plantillaEstatus = (rowData) => {
-    return <Tag value={rowData.estadoOrden} severity={getSeverity(rowData)}></Tag>;
-  };
-  const plantillaPrecio = (rowData) => { return formatoPrecio(rowData.Total) }
-  const fecha = (rowData) => {return FormatoFecha(rowData.fechaRecepcion) }
+  // --------- |Plantillas| -------------
+
+  // const plantillaEstatus = (rowData) => {
+  //   return <Tag value={rowData.estadoOrden} severity={getSeverity(rowData)}></Tag>;
+  // };
+  // const plantillaPrecio = (rowData) => { return formatoPrecio(rowData.Total) }
+  // const fecha = (rowData) => { return FormatoFecha(rowData.fechaRecepcion) }
+  const plantillaFechaEntrega = (rowData) => { return formatearFecha(rowData.fechaEntrega) }
+  const plantillaFechaDevolucion = (rowData) => { return formatearFecha(rowData.fechaLimiteDev) }
 
   //----------------| Interaccion con dialogos |----------------
- 
+
   const cerrarDialogoEliminarRegistro = () => { setDeleteOrderDialog(false) };
 
   const cerrarDialogoEliminarRegistros = () => { setDeleteOrdersDialog(false) }
 
   //----------------| Funciones Back-end |----------------
- 
-    //--> Editar registro
-   
+
+  //--> Editar registro
+
 
 
   const confirmarEliminarRegistro = (order) => {
@@ -170,7 +177,7 @@ const Ordenes = () => {
     });
   };
 
-  
+
   //----------------| Botones de dialogos |----------------
   const cabezal = (
     <div className="flex flex-wrap gap-2 align-items-center justify-content-between">
@@ -185,9 +192,9 @@ const Ordenes = () => {
   const deleteButton = () => {
     return (
       <div className="flex flex-wrap gap-2">
-      
+
         <Button label="Eliminar" icon="pi pi-trash" severity="danger" onClick={confirmDeleteSelected} disabled={!selectedOrders || !selectedOrders.length} />
-       
+
       </div>
     );
   };
@@ -196,12 +203,12 @@ const Ordenes = () => {
   const botonesAccion = (rowData) => {
     return (
       <>
-       <Button label="Estatus"
-       icon= 'pi pi-pencil'
-        severity="success"
-        onClick={handleButtonClick}
-      />
-        <Button icon="pi pi-trash" label="Eliminar"  severity="danger" onClick={() => confirmarEliminarRegistro(rowData)} />
+        <Button label="Estatus"
+          icon='pi pi-pencil'
+          severity="success"
+          onClick={handleButtonClick}
+        />
+        <Button icon="pi pi-trash" label="Eliminar" severity="danger" onClick={() => confirmarEliminarRegistro(rowData)} />
       </>
     );
   };
@@ -209,17 +216,17 @@ const Ordenes = () => {
 
   const botonesEliminarRegistro = (
     <>
-      <Button severity="success" label="Aceptar" icon="pi pi-check"  onClick={eliminarRegistro} />
-      <Button severity="danger" label="Cancelar" icon="pi pi-times"  onClick={cerrarDialogoEliminarRegistro} />
-      
+      <Button severity="success" label="Aceptar" icon="pi pi-check" onClick={eliminarRegistro} />
+      <Button severity="danger" label="Cancelar" icon="pi pi-times" onClick={cerrarDialogoEliminarRegistro} />
+
     </>
   );
 
   const botonesEliminarRegistros = (
     <>
-    <Button label="Aceptar" icon="pi pi-check" severity="success" onClick={deleteSelectedOrders} />
-      <Button label="Cancelar"  severity="danger" icon="pi pi-times"   onClick={cerrarDialogoEliminarRegistros} />
-      
+      <Button label="Aceptar" icon="pi pi-check" severity="success" onClick={deleteSelectedOrders} />
+      <Button label="Cancelar" severity="danger" icon="pi pi-times" onClick={cerrarDialogoEliminarRegistros} />
+
     </>
   );
 
@@ -243,48 +250,51 @@ const Ordenes = () => {
               globalFilter={globalFilter} header={cabezal}
             >
               <Column selectionMode="multiple" exportable={false} />
-              <Column field="idOrden" header="ID Orden" sortable style={{ minWidth: '12rem', textAlign: "center" }} />
-              <Column field="idCliente" header="ID Cliente" sortable style={{ minWidth: '12rem', textAlign: "center" }} />
-              <Column field="nomCliente" header="Nombre Cliente" sortable style={{ minWidth: '16rem', textAlign: "center" }} />
-              <Column field="fechaRecepcion" header="Fecha de Recepción" sortable style={{ minWidth: '16rem', textAlign: "center" }} > <FormatoFecha fechaRecepcion={fecha} /> </Column>
-              <Column  header="Productos"  body={plantillaProductos} sortable style={{ minWidth: '12rem', textAlign: "center" }} />
-           
-       
-              <Column field="estadoOrden" header="Estatus" body={plantillaEstatus} sortable style={{ minWidth: '12rem', textAlign: "center" }} />
-              <Column field="direccionCliente" header="Dirección" sortable style={{ minWidth: '16rem', textAlign: "center" }} />
-              <Column field="Total" header="Total"  body={plantillaPrecio} sortable style={{ minWidth: '12rem', textAlign: "center" }} />
-             
-              <Column header="Modificar Estatus / Eliminar registro" body={botonesAccion} exportable={false} style={{ minWidth: '20rem' , textAlign: "center"}} />
-            </DataTable>
-
-            <Dialog
-        visible={displayDialog}
-        onHide={handleDialogHide}
-        header="Modificar estado del pedido"
-        footer={
-          <div>
-            <Button label="Guardar" severity="success" onClick={handleStatusChange} autoFocus />
-            <Button label="Cancelar" severity="danger" onClick={handleDialogHide} className="p-button-text" />
-            
-          </div>
-        }
-      >
-        <div>
-          <h5>Nuevo estado del pedido:</h5> <br/>
-          {estatusOptions.map((option) => (
-            <div key={option.value}>
-              <RadioButton
-                inputId={option.value}
-                name="pedidoStatus"
-                value={option.value}
-                onChange={(e) => setPedidoStatus(e.value)}
-                checked={pedidoStatus === option.value}
+              <Column field="nombrePedido" header="ID Orden" sortable style={{ minWidth: '12rem', textAlign: "center" }} />
+              <Column
+                field="fechaEntrega" header="Fecha de realización de pedido" sortable body={plantillaFechaEntrega}
+                style={{ minWidth: '16rem', textAlign: "center" }} ></Column>
+              {/* <Column
+                field="fechaLimiteDev" header="Fecha de devolución" sortable body={plantillaFechaDevolucion}
+                style={{ minWidth: '16rem', textAlign: "center" }} ></Column> */}
+              <Column
+                field="totalArticulos" header="Productos" sortable
+                style={{ minWidth: '12rem', textAlign: "center" }}
               />
-              <label htmlFor={option.value}>{option.label}</label>
-            </div>
-          ))}
-        </div>
-      </Dialog>
+              <Column
+                field="costoArticulos" header="Costo de artículos" sortable style={{ minWidth: '16rem', textAlign: "center" }} />
+              <Column field="costoEnvio" header="Costo de envio" sortable style={{ minWidth: '12rem', textAlign: "center" }} />
+              <Column field="costoTotal" header="Costo total" sortable style={{ minWidth: '12rem', textAlign: "center" }} />
+              <Column header="Modificar Estatus / Eliminar registro" body={botonesAccion} exportable={false} style={{ minWidth: '20rem', textAlign: "center" }} />
+            </DataTable>
+            <Dialog
+              visible={displayDialog}
+              onHide={handleDialogHide}
+              header="Modificar estado del pedido"
+              footer={
+                <div>
+                  <Button label="Guardar" severity="success" onClick={handleStatusChange} autoFocus />
+                  <Button label="Cancelar" severity="danger" onClick={handleDialogHide} className="p-button-text" />
+
+                </div>
+              }
+            >
+              <div>
+                <h5>Nuevo estado del pedido:</h5> <br />
+                {estatusOptions.map((option) => (
+                  <div key={option.value}>
+                    <RadioButton
+                      inputId={option.value}
+                      name="pedidoStatus"
+                      value={option.value}
+                      onChange={(e) => setPedidoStatus(e.value)}
+                      checked={pedidoStatus === option.value}
+                    />
+                    <label htmlFor={option.value}>{option.label}</label>
+                  </div>
+                ))}
+              </div>
+            </Dialog>
 
             <Dialog
               visible={deleteOrderDialog} style={{ width: '32rem' }}

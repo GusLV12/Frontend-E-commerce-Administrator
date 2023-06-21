@@ -25,3 +25,12 @@ export const verTemporadas = "http://localhost:4000/api/temporada/mostrarTempora
 //--> Lista de dropdowns
 export const listaFlores = "http://localhost:4000/api/productos/mostrarFlores"
 export const listaPeluches = "http://localhost:4000/api/productos/mostrarPeluches"
+
+//->Funciones consulta
+export const consultarTarjeta = "http://localhost:4000/api/cliente/interaccionPed/verTarjetas"
+export const consultarDir = "http://localhost:4000/api/cliente/interaccionPed/verDirecciones"
+
+
+//--> Endpoints de pedidos
+export const consultarPedidos = "http://localhost:4000/api/administrador/pedidos/mostrarPedidos"
+export const consultarPedidosCancelados = "http://localhost:4000/api/administrador/pedidos/mostrarPedidosCancelados"

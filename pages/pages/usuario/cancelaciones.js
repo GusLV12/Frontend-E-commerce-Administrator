@@ -17,6 +17,8 @@ import { RadioButton } from 'primereact/radiobutton';
 import { Message } from 'primereact/message';
 //--> Funciones propias
 import { objetoVacio } from "@/components/catalogos/objetovacio";
+import axios from "axios";
+import { consultarPedidosCancelados } from "@/helpers/constantes/links";
 
 
 const Cancelaciones = () => {
@@ -39,28 +41,46 @@ const Cancelaciones = () => {
   const toast = useRef(null);
   const dt = useRef(null);
 
+  const verPedidosCancelados = async () => {
+    console.log('Ver pedidos cancelados')
+    //--> Preparar objeto para mandar al back-end
+    const token = localStorage.getItem('token')
+    const cabecera = {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    }
+    try {
+      const respuesta = await axios.get(consultarPedidosCancelados, cabecera)
+      console.log(respuesta.data.cancelados)
+      setOrders(respuesta.data.cancelados)
+    } catch (error) { console.log(error) }
+  }
+
+  useEffect(() => { verPedidosCancelados() }, [])
+
   //--> Cargar cuando se renderiza
-  useEffect(() => {
-    const datos = [
-      { id: 115, idCliente: 15, nomCliente:'Omar Yu' , fechaDev: 25 },
-      { id: 119, idCliente: 49, nomCliente:'Lisa Mora' , fechaDev: 293 },
-      { id: 205, idCliente: 13, nomCliente: 'Alhatam L.', fechaDev: 27 },
-      { id: 163, idCliente: 65, nomCliente:'Mario Quintos' , fechaDev: 153 },
-    ]
-    setOrders(datos)
-  }, []);
+  // useEffect(() => {
+  //   const datos = [
+  //     { id: 115, idCliente: 15, nomCliente: 'Omar Yu', fechaDev: 25 },
+  //     { id: 119, idCliente: 49, nomCliente: 'Lisa Mora', fechaDev: 293 },
+  //     { id: 205, idCliente: 13, nomCliente: 'Alhatam L.', fechaDev: 27 },
+  //     { id: 163, idCliente: 65, nomCliente: 'Mario Quintos', fechaDev: 153 },
+  //   ]
+  //   setOrders(datos)
+  // }, []);
 
 
   //----------------| Interaccion con dialogos |----------------
- 
+
   const cerrarDialogoEliminarRegistro = () => { setDeleteOrderDialog(false) };
 
   const cerrarDialogoEliminarRegistros = () => { setDeleteOrdersDialog(false) }
 
   //----------------| Funciones Back-end |----------------
- 
-    //--> Editar registro
-   
+
+  //--> Editar registro
+
 
   const confirmarEliminarRegistro = (order) => {
     setOrder(order);
@@ -94,7 +114,7 @@ const Cancelaciones = () => {
     });
   };
 
-  
+
   //----------------| Botones de dialogos |----------------
   const cabezal = (
     <div className="flex flex-wrap gap-2 align-items-center justify-content-between">
@@ -109,7 +129,7 @@ const Cancelaciones = () => {
   const deleteButton = () => {
     return (
       <div className="flex flex-wrap gap-2">
-      
+
         <Button label="Eliminar" icon="pi pi-trash" severity="danger" onClick={confirmDeleteSelected} disabled={!selectedOrders || !selectedOrders.length} />
       </div>
     );
@@ -119,7 +139,7 @@ const Cancelaciones = () => {
   const botonesAccion = (rowData) => {
     return (
       <>
-        <Button icon="pi pi-trash" rounded  severity="danger" onClick={() => confirmarEliminarRegistro(rowData)} />
+        <Button icon="pi pi-trash" rounded severity="danger" onClick={() => confirmarEliminarRegistro(rowData)} />
       </>
     );
   };
@@ -127,17 +147,17 @@ const Cancelaciones = () => {
 
   const botonesEliminarRegistro = (
     <>
-      <Button severity="success" label="Aceptar" icon="pi pi-check"  onClick={eliminarRegistro} />
-      <Button severity="danger" label="Cancelar" icon="pi pi-times"  onClick={cerrarDialogoEliminarRegistro} />
-      
+      <Button severity="success" label="Aceptar" icon="pi pi-check" onClick={eliminarRegistro} />
+      <Button severity="danger" label="Cancelar" icon="pi pi-times" onClick={cerrarDialogoEliminarRegistro} />
+
     </>
   );
 
   const botonesEliminarRegistros = (
     <>
-    <Button label="Aceptar" icon="pi pi-check" severity="success" onClick={deleteSelectedOrders} />
-      <Button label="Cancelar"  severity="danger" icon="pi pi-times"   onClick={cerrarDialogoEliminarRegistros} />
-      
+      <Button label="Aceptar" icon="pi pi-check" severity="success" onClick={deleteSelectedOrders} />
+      <Button label="Cancelar" severity="danger" icon="pi pi-times" onClick={cerrarDialogoEliminarRegistros} />
+
     </>
   );
 
@@ -161,16 +181,16 @@ const Cancelaciones = () => {
               globalFilter={globalFilter} header={cabezal}
             >
               <Column selectionMode="multiple" exportable={false} />
-              <Column field="id" header="ID Orden" sortable style={{ minWidth: '12rem', textAlign: "center" }} />
+              <Column field="nombrePedido" header="ID pedido" sortable style={{ minWidth: '12rem', textAlign: "center" }} />
               <Column field="idCliente" header="ID Cliente" sortable style={{ minWidth: '12rem', textAlign: "center" }} />
               <Column field="nomCliente" header="Nombre Cliente" sortable style={{ minWidth: '16rem', textAlign: "center" }} />
-          
+
               <Column field="fechaDev" header="Fecha de Cancelación" sortable style={{ minWidth: '16rem', textAlign: "center" }} />
-              
-              <Column header="Eliminar registro" body={botonesAccion} exportable={false} style={{ minWidth: '5rem' , textAlign: "center"}} />
+
+              <Column header="Eliminar registro" body={botonesAccion} exportable={false} style={{ minWidth: '5rem', textAlign: "center" }} />
             </DataTable>
 
-           
+
 
             <Dialog
               visible={deleteOrderDialog} style={{ width: '32rem' }}
