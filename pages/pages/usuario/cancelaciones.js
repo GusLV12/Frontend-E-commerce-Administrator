@@ -19,6 +19,7 @@ import { Message } from 'primereact/message';
 import { objetoVacio } from "@/components/catalogos/objetovacio";
 import axios from "axios";
 import { consultarPedidosCancelados } from "@/helpers/constantes/links";
+import { formatearFecha } from "@/helpers/funciones";
 
 
 const Cancelaciones = () => {
@@ -161,6 +162,10 @@ const Cancelaciones = () => {
     </>
   );
 
+  const plantillaFechaCompra = (rowData) => { return formatearFecha(rowData.fechaCompra) }
+  const plantillaFechaEntrega = (rowData) => { return formatearFecha(rowData.fechaEntrega) }
+  const plantillaFechaDev = (rowData) => { return formatearFecha(rowData.fechaLimiteDev) }
+  const plantillaFechaCancelacion = (rowData) => { return formatearFecha(rowData.fechaCancelacion) }
   //----------------| Valor que regresara |----------------
   return (
     <Layout
@@ -182,10 +187,22 @@ const Cancelaciones = () => {
             >
               <Column selectionMode="multiple" exportable={false} />
               <Column field="nombrePedido" header="ID pedido" sortable style={{ minWidth: '12rem', textAlign: "center" }} />
-              <Column field="idCliente" header="ID Cliente" sortable style={{ minWidth: '12rem', textAlign: "center" }} />
-              <Column field="nomCliente" header="Nombre Cliente" sortable style={{ minWidth: '16rem', textAlign: "center" }} />
-
-              <Column field="fechaDev" header="Fecha de Cancelación" sortable style={{ minWidth: '16rem', textAlign: "center" }} />
+              <Column
+                field="fechaCompra" header="Fecha de compra" sortable style={{ minWidth: '12rem', textAlign: "center" }}
+                body={plantillaFechaCompra}
+              />
+              <Column
+                field="fechaEntrega" header="Fecha de entrega" sortable style={{ minWidth: '16rem', textAlign: "center" }}
+                body={plantillaFechaEntrega}
+              />
+              <Column
+                field="fechaLimiteDev" header="Fecha de devolucion" sortable style={{ minWidth: '16rem', textAlign: "center" }}
+                body={plantillaFechaDev}
+              />
+              <Column
+                field="fechaCancelacion" header="Fecha de cancelación" sortable style={{ minWidth: '16rem', textAlign: "center" }}
+                body={plantillaFechaCancelacion}
+              />
 
               <Column header="Eliminar registro" body={botonesAccion} exportable={false} style={{ minWidth: '5rem', textAlign: "center" }} />
             </DataTable>
